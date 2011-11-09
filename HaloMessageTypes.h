@@ -1,0 +1,17 @@
+#ifndef HALO_MESSAGE_TYPES_H
+#define HALO_MESSAGE_TYPES_H
+
+enum HaloMsgTypes
+{
+    ALL_DATA,
+    ALL_DATA_DYNAMIC,
+    VITALS,
+    LOCATION,
+    BATTERY,
+    SYS_LOG,
+    RAW_CAPTURE_STATE,
+    RAW_CAPTURE_DATA,
+    CRITICAL_ALERT
+};
+
+#endif //HALO_MESSAGE_TYPES_H
