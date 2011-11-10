@@ -14,6 +14,14 @@
 
 #define ACK_STACK_SIZE 50
 
+enum TxSessionState
+{
+    UNINITIATED,
+    START_NEW_SESSION,
+    NEW_SESSION_IN_PROGRESS,
+    SESSION_IN_USE
+};
+
 typedef struct
 {
     struct sockaddr_in socketAddr;
@@ -26,6 +34,7 @@ typedef struct
     int sessionTickCount;
     uint16 txSeqNum;
     int newTxSession; //Indicates that a new session is starting
+    enum TxSessionState txSessionState;
     int32 currentTxSession;
 }
 SessionData;
@@ -41,6 +50,7 @@ SessionData;
  .sessionTickCount = 0, \
  .txSeqNum  = 0, \
  .newTxSession = 0, \
+ .txSessionState = UNINITIATED, \
  .currentTxSession = -1, \
 }
 
@@ -82,7 +92,7 @@ int getSessionIndex( struct sockaddr_in socketAddress, socklen_t socketAddressLe
 void halo_msg_tx_sent( struct sockaddr_in socketAddress, socklen_t socketAddressLength, uint16 txSeqNum);
 
 //Handler for failed transmitted msgs
-void halo_msg_tx_dropped(void);
+void halo_msg_tx_dropped(int offset);
 
 void halo_msg_init(HaloUdpUserData *userData)
 {
@@ -118,6 +128,7 @@ void halo_msg_init(HaloUdpUserData *userData)
         haloUdpCommData.sessionData[i].sessionTickCount = 0;
         haloUdpCommData.sessionData[i].txSeqNum  = 0;
         haloUdpCommData.sessionData[i].newTxSession = 0;
+        haloUdpCommData.sessionData[i].txSessionState = UNINITIATED;
         haloUdpCommData.sessionData[i].currentTxSession = -1;
     }
 
@@ -162,6 +173,7 @@ void halo_msg_new_session(int sessionIndex)
         sessionNum = currentSessionPtr->currentTxSession;
         //This handles resetting all of the state information used to keep track of data being exchanged
         currentSessionPtr->newTxSession = 1;
+        currentSessionPtr->txSessionState = UNINITIATED;
         sessionNum++;
         currentSessionPtr->currentTxSession = (uint32) sessionNum;
         currentSessionPtr->txSeqNum = 0;
@@ -367,9 +379,25 @@ int getSessionIndex( struct sockaddr_in socketAddress, socklen_t socketAddressLe
     return result;
 }
 
+void resetTxSessions(void)
+{
+    int i;
+
+    //Makes it so that each session only sends one packet at a time when starting a new session
+    for (i = 0; i < MAX_CONCURRENT_CONNNECTIONS; i++)
+    {
+        if ((haloUdpCommData.sessionData[i].used)&&(haloUdpCommData.sessionData[i].newTxSession))
+        {
+            haloUdpCommData.sessionData[i].txSessionState = UNINITIATED;
+        }
+    }
+}
+
 //Manages retransmitting a pending msg
 void halo_msg_rexmit(void)
 {
+    const int MAX_BURST_SIZE = 5;
+    static int burstOffset = 0;
     SessionData *currentSessionPtr = NULL;
     UdpCommStruct *commStruct = NULL;
     HaloUdpTxMgmt *txMgmt = NULL;
@@ -379,70 +407,136 @@ void halo_msg_rexmit(void)
     int sessionIndex;
     struct sockaddr_in socketAddress;
     socklen_t socketAddressLength;
-    int offset;
+    int txPktQueueSize;
+    int count;
+    int retries = -1;
 
     commStruct = &haloUdpCommData.haloUdpCommStruct;
     txMgmt     = &haloUdpCommData.txMgmt;
-    offset = 0;
 
-    if (peek_tx_packet(txMgmt, offset, &data, &dataLen, &seqNum, &socketAddress, &socketAddressLength) == SUCCESS)
+    if (pending_tx_packet(txMgmt))
     {
-        if (getSessionIndex(socketAddress, socketAddressLength, &sessionIndex) == SUCCESS)
+        int tempOffset;
+        resetTxSessions();
+        txPktQueueSize = tx_packet_queue_size(txMgmt);
+        burstOffset = burstOffset % txPktQueueSize; //Makes sure the offset is in bounds
+        tempOffset = burstOffset;
+
+        //Send everything that's presently available in the queue (giant burst of UDP)
+        for (count = 0; (count < MAX_BURST_SIZE)&&(count < txPktQueueSize); count++)
         {
-            currentSessionPtr = &haloUdpCommData.sessionData[sessionIndex];
-
-            //Modify the header to request a new session if needed
-            if (currentSessionPtr->newTxSession)
+            if (peek_tx_packet(txMgmt, burstOffset, &data, &dataLen, &seqNum, &socketAddress, &socketAddressLength) == SUCCESS)
             {
-                MyHaloUdpHeader *header = (MyHaloUdpHeader *) data;
-                int msgLen;
-                uint16 pktCrc;
+                get_tx_retries(txMgmt, burstOffset, &retries);
+                if (( retries < MAX_REXMIT)&&(MAX_REXMIT > 0))
+                {
+                    if (getSessionIndex(socketAddress, socketAddressLength, &sessionIndex) == SUCCESS)
+                    {
+                        int allowSend = 0;
 
-                header->status |= NEW_SESSION;
+                        currentSessionPtr = &haloUdpCommData.sessionData[sessionIndex];
 
-                //Calculate total msg length
-                msgLen = header->payloadLength;
-                msgLen += sizeof(MyHaloUdpHeader); //header: udp data
-                msgLen += sizeof(uint16);  //tail: crc
+                        //Modify the header to request a new session if needed
+                        if (currentSessionPtr->newTxSession)
+                        {
+                            if ((currentSessionPtr->txSessionState == UNINITIATED)||(currentSessionPtr->txSessionState == SESSION_IN_USE))
+                            {
+                                currentSessionPtr->txSessionState = START_NEW_SESSION;
+                            }
 
-                //Recalculate the CRC
-                pktCrc = hdlcFcs16(hdlc_init_fcs16, data, msgLen - 2);
+                            if (currentSessionPtr->txSessionState == START_NEW_SESSION)
+                            {
+                                MyHaloUdpHeader *header = (MyHaloUdpHeader *) data;
+                                int msgLen;
+                                uint16 pktCrc;
 
-                if (haloUdpCommData.userData->dbgTestCtrls.badCrc)
-                    pktCrc++;
+                                currentSessionPtr->txSessionState = NEW_SESSION_IN_PROGRESS;
+                                header->status |= NEW_SESSION;
 
-                //Copy CRC
-                memcpy(&data[msgLen - 2], &pktCrc, sizeof(pktCrc));
+                                //Calculate total msg length
+                                msgLen = header->payloadLength;
+                                msgLen += sizeof(MyHaloUdpHeader); //header: udp data
+                                msgLen += sizeof(uint16);  //tail: crc
+
+                                //Recalculate the CRC
+                                pktCrc = hdlcFcs16(hdlc_init_fcs16, data, msgLen - 2);
+
+                                if (haloUdpCommData.userData->dbgTestCtrls.badCrc)
+                                    pktCrc++;
+
+                                //Copy CRC
+                                memcpy(&data[msgLen - 2], &pktCrc, sizeof(pktCrc));
+                                allowSend = 1;
+                            }
+                        }
+                        else
+                        {
+                            allowSend = 1;
+                        }
+
+                        if (allowSend) //Only send when not in a new session or the first packet in a new session
+                        {
+                            //Data transmission happens from here
+                            udp_sendto(commStruct, data, dataLen, &currentSessionPtr->socketAddr, currentSessionPtr->socketAddrLen);
+
+                            incr_tx_retries(txMgmt, burstOffset);
+                        }
+
+                        //NOTE: To support multi-sending, newTxSession will need to be an enum type that has initial, pending, and done as states
+                        //So that a given session will only send one data msg per session while a new session is being sent out
+                        //As long as the state is done, multiple can be send out (for a given session).
+                    }
+                    else //Must be able to transmit even if the rcv entry / acknowledgement stack entry is absent
+                    {
+                        //TO DO: Handle what happens if you cannot find the session entry when it is time to send
+                        //Create a new session entry
+                        //Recompute the CRC for the pending msg
+                        //How this happens: Msg gets received, tx queue is so huge / communication problems that
+                        //Session entry times out from rcv inactivity, then msg finally gets sent
+
+                        //Since all of the data necessary to send the item is already present, then data can be sent unaltered
+                        //A new session can only then have a chance to be recreated when there is an entry.
+                        //TO DO: Figure out how to handle new session requests (for now the answer is we don't and indicate such)
+                        //when there is not an acknowledgement queue entry
+                        //This is set up intentionally so that the server cannot send data from a client it much later
+                        //Unless it go the info from a handler
+
+                        //Data transmission happens from here
+                        udp_sendto(commStruct, data, dataLen, &socketAddress, socketAddressLength);
+
+                        incr_tx_retries(txMgmt, burstOffset);
+                    }
+                }
             }
 
-            //Data transmission happens from here
-            udp_sendto(commStruct, data, dataLen, &currentSessionPtr->socketAddr, currentSessionPtr->socketAddrLen);
-
-            incr_tx_retries(txMgmt, offset);
-
-            //NOTE: To support multi-sending, newTxSession will need to be an enum type that has initial, pending, and done as states
-            //So that a given session will only send one data msg per session while a new session is being sent out
-            //As long as the state is done, multiple can be send out (for a given session).
+            burstOffset = (burstOffset + 1) % txPktQueueSize; //Increment the burst with roll over
         }
-        else //Must be able to transmit even if the rcv entry / acknowledgement stack entry is absent
+
+        //Cleans up any entries where the maximum transmissions have happened
+        //Send everything that's presently available in the queue (giant burst of UDP)
+        for (count = 0; (count < MAX_BURST_SIZE)&&(count < txPktQueueSize); count++)
         {
-            //TO DO: Handle what happens if you cannot find the session entry when it is time to send
-            //Create a new session entry
-            //Recompute the CRC for the pending msg
-            //How this happens: Msg gets received, tx queue is so huge / communication problems that
-            //Session entry times out from rcv inactivity, then msg finally gets sent
+            if (peek_tx_packet(txMgmt, tempOffset, &data, &dataLen, &seqNum, &socketAddress, &socketAddressLength) == SUCCESS)
+            {
+                get_tx_retries(txMgmt, tempOffset, &retries);
+                if (( retries >= MAX_REXMIT)||(MAX_REXMIT <= 0))
+                {
+                    if (haloUdpCommData.userData->dbgTestCtrls.neverTxDrop)
+                    {
+                        reset_tx_retries(txMgmt, tempOffset);
+                    }
+                    else
+                    {
+                        halo_msg_tx_dropped(tempOffset);
+                        ////Redo the search each time tx_dropped is called because the queue positions have changed
+                        //txPktQueueSize = tx_packet_queue_size(txMgmt);
+                        //count = 0;
+                        tempOffset = (tempOffset + txPktQueueSize - 1) % txPktQueueSize; //Go back by one when dequeuing
+                    }
+                }
+            }
 
-            //Since all of the data necessary to send the item is already present, then data can be sent unaltered
-            //A new session can only then have a chance to be recreated when there is an entry.
-            //TO DO: Figure out how to handle new session requests (for now the answer is we don't and indicate such)
-            //when there is not an acknowledgement queue entry
-            //This is set up intentionally so that the server cannot send data from a client it much later
-            //Unless it go the info from a handler
-
-            //Data transmission happens from here
-            udp_sendto(commStruct, data, dataLen, &socketAddress, socketAddressLength);
-
-            incr_tx_retries(txMgmt, offset);
+            tempOffset = (tempOffset + 1) % txPktQueueSize; //Increment the burst with roll over
         }
     }
 }
@@ -482,6 +576,7 @@ void halo_msg_tx_sent( struct sockaddr_in socketAddress, socklen_t socketAddress
                 freeBuffer(data);
 
                 reset_tx_retries(txMgmt, i);
+                break; //Only dequeue one.
             }
         }
     }
@@ -489,7 +584,7 @@ void halo_msg_tx_sent( struct sockaddr_in socketAddress, socklen_t socketAddress
 
 //Handler for failed transmitted msgs
 //TO DO: Consider having dropped being handled similar to sent.
-void halo_msg_tx_dropped(void)
+void halo_msg_tx_dropped(int offset)
 {
     HaloUdpTxMgmt *txMgmt = NULL;
     uint8 *data;
@@ -497,10 +592,8 @@ void halo_msg_tx_dropped(void)
     uint16 seqNum;
     struct sockaddr_in pktSocketAddress;
     socklen_t pktSocketAddressLength;
-    int offset;
 
     txMgmt     = &haloUdpCommData.txMgmt;
-    offset = 0;
 
     if (peek_tx_packet(txMgmt, offset, &data, &dataLen, &seqNum, &pktSocketAddress, &pktSocketAddressLength) == SUCCESS)
     {
@@ -515,8 +608,6 @@ void halo_msg_tx_dropped(void)
 
         if (haloUdpCommData.userData->debug)
             printf("Dropping msg! Retransmit limit exceeded!\n");
-
-        reset_tx_retries(txMgmt, offset);
     }
 }
 
@@ -613,7 +704,6 @@ void udp_recv_handler(void *data)
             //Drop packets if we can't handle the sessions
             processPkt = 0;
         }
-
     }
 
     if (processPkt) //Validates the data
@@ -647,6 +737,7 @@ void udp_recv_handler(void *data)
                 if (currentSessionPtr->newTxSession)
                 {
                     currentSessionPtr->newTxSession = 0;
+                    currentSessionPtr->txSessionState = SESSION_IN_USE;
                 }
             }
         }
@@ -787,38 +878,16 @@ void halo_msg_tick(void)
     UdpCommStruct *commStruct = NULL;
     HaloUdpTxMgmt *txMgmt = NULL;
     int i;
-    int offset;
 
     commStruct = &haloUdpCommData.haloUdpCommStruct;
     txMgmt     = &haloUdpCommData.txMgmt;
-    offset = 0;
 
     udp_tick(commStruct);
 
     //Retransmission
     if ((haloUdpCommData.tickCount % TICKS_PER_REXMIT) == (TICKS_PER_REXMIT - 1))
     {
-        if (pending_tx_packet(txMgmt))
-        {
-            int retries = -1;
-            //Rexmit
-            get_tx_retries(txMgmt, offset, &retries);
-            if(( retries < MAX_REXMIT)&&(MAX_REXMIT > 0))
-            {
-                halo_msg_rexmit();
-            }
-            else
-            {
-                if (haloUdpCommData.userData->dbgTestCtrls.neverTxDrop)
-                {
-                    reset_tx_retries(txMgmt, offset);
-                }
-                else
-                {
-                    halo_msg_tx_dropped();
-                }
-            }
-        }
+        halo_msg_rexmit();
     }
 
     if (haloUdpCommData.userData->actAsServer) //Only deactivate sessions if server
