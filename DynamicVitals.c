@@ -3,13 +3,13 @@
 #include "DynamicVitals.h"
 
 //Populates the structure correctly. Needed since partial xmission is done to save space.
-void pack_DynamicVitals(DynamicVitals *msg, void *dstData)
+void pack_DynamicVitals(const DynamicVitals *msg, void *dstData)
 {
     StepInfo *stepInfoPtr;
     ActivityInfo *activityInfoPtr;
     uint8 *dataPtr;
 
-    dataPtr = dstData;
+    dataPtr = (uint8 *) dstData;
 
     memcpy(dataPtr, &msg->baseMessage, sizeof(HaloMessage));
     dataPtr += sizeof(HaloMessage);
@@ -20,22 +20,22 @@ void pack_DynamicVitals(DynamicVitals *msg, void *dstData)
     memcpy(dataPtr, &msg->currentLocation, sizeof(Location));
     dataPtr += sizeof(Location);
 
-    stepInfoPtr = dataPtr;
+    stepInfoPtr = (StepInfo *) dataPtr;
     stepInfoPtr->sampleFrequency = msg->stepData.sampleFrequency;
     stepInfoPtr->updateFrequency = msg->stepData.updateFrequency;
     stepInfoPtr->numberOfEntries = msg->stepData.numberOfEntries;
     memcpy(&stepInfoPtr->steps[0], &msg->stepData.steps[0], sizeof(uint16)*msg->stepData.numberOfEntries);
 
-    dataPtr = &stepInfoPtr->steps[0];
+    dataPtr = (uint8 *) &stepInfoPtr->steps[0];
     dataPtr += (sizeof(uint16)*stepInfoPtr->numberOfEntries);
-    activityInfoPtr = dataPtr;
+    activityInfoPtr = (ActivityInfo *) dataPtr;
     activityInfoPtr->sampleFrequency = msg->activityData.sampleFrequency;
     activityInfoPtr->updateFrequency = msg->activityData.updateFrequency;
     activityInfoPtr->numberOfEntries = msg->activityData.numberOfEntries;
     memcpy(&activityInfoPtr->activities[0], &msg->activityData.activities[0], sizeof(uint16)*msg->activityData.numberOfEntries);
 }
 
-void unpack_DynamicVitals(void *srcData, DynamicVitals *msg)
+void unpack_DynamicVitals(const void *srcData, DynamicVitals *msg)
 {
     DynamicVitals *srcMsg = (DynamicVitals *) srcData;
     StepInfo *stepInfoPtr;
@@ -52,9 +52,9 @@ void unpack_DynamicVitals(void *srcData, DynamicVitals *msg)
     msg->stepData.numberOfEntries = stepInfoPtr->numberOfEntries;
     memcpy(&msg->stepData.steps[0], &stepInfoPtr->steps[0], sizeof(uint16)*stepInfoPtr->numberOfEntries);
 
-    dataPtr = &stepInfoPtr->steps[0];
+    dataPtr = (uint8 *) &stepInfoPtr->steps[0];
     dataPtr += (sizeof(uint16)*stepInfoPtr->numberOfEntries);
-    activityInfoPtr = dataPtr;
+    activityInfoPtr = (ActivityInfo *) dataPtr;
     msg->activityData.sampleFrequency = activityInfoPtr->sampleFrequency;
     msg->activityData.updateFrequency = activityInfoPtr->updateFrequency;
     msg->activityData.numberOfEntries = activityInfoPtr->numberOfEntries;

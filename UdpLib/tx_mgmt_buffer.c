@@ -71,6 +71,25 @@ int peekBuffer(TxMgmtBuffer *txMgmtBuffer, int offset, TxEntry *txEntry)
     return result;
 }
 
+int setBuffer(TxMgmtBuffer *txMgmtBuffer, int offset, TxEntry *txEntry)
+{
+    int result = FAIL;
+
+    if ((txMgmtBuffer->numberOfAllocatedEntries > 0)&&(offset < txMgmtBuffer->numberOfAllocatedEntries))
+    {
+        int entryPosition;
+
+        entryPosition = (txMgmtBuffer->arrayHead + offset) % TX_MGMT_BUFFER_SIZE; //Increment Postion
+
+        txMgmtBuffer->entries[entryPosition] = *txEntry;
+
+        //Update result
+        result = SUCCESS;
+    }
+
+    return result;
+}
+
 int isBufferEmpty(TxMgmtBuffer *txMgmtBuffer)
 {
     return (txMgmtBuffer->numberOfAllocatedEntries <= 0);

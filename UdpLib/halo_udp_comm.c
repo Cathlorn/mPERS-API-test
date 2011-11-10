@@ -379,11 +379,13 @@ void halo_msg_rexmit(void)
     int sessionIndex;
     struct sockaddr_in socketAddress;
     socklen_t socketAddressLength;
+    int offset;
 
     commStruct = &haloUdpCommData.haloUdpCommStruct;
     txMgmt     = &haloUdpCommData.txMgmt;
+    offset = 0;
 
-    if (peek_tx_packet(txMgmt, 0, &data, &dataLen, &seqNum, &socketAddress, &socketAddressLength) == SUCCESS)
+    if (peek_tx_packet(txMgmt, offset, &data, &dataLen, &seqNum, &socketAddress, &socketAddressLength) == SUCCESS)
     {
         if (getSessionIndex(socketAddress, socketAddressLength, &sessionIndex) == SUCCESS)
         {
@@ -416,7 +418,7 @@ void halo_msg_rexmit(void)
             //Data transmission happens from here
             udp_sendto(commStruct, data, dataLen, &currentSessionPtr->socketAddr, currentSessionPtr->socketAddrLen);
 
-            txMgmt->txRetryCount++;
+            incr_tx_retries(txMgmt, offset);
 
             //NOTE: To support multi-sending, newTxSession will need to be an enum type that has initial, pending, and done as states
             //So that a given session will only send one data msg per session while a new session is being sent out
@@ -440,7 +442,7 @@ void halo_msg_rexmit(void)
             //Data transmission happens from here
             udp_sendto(commStruct, data, dataLen, &socketAddress, socketAddressLength);
 
-            txMgmt->txRetryCount++;
+            incr_tx_retries(txMgmt, offset);
         }
     }
 }
@@ -479,7 +481,7 @@ void halo_msg_tx_sent( struct sockaddr_in socketAddress, socklen_t socketAddress
                 //Return the buffer
                 freeBuffer(data);
 
-                txMgmt->txRetryCount = 0;
+                reset_tx_retries(txMgmt, i);
             }
         }
     }
@@ -495,10 +497,12 @@ void halo_msg_tx_dropped(void)
     uint16 seqNum;
     struct sockaddr_in pktSocketAddress;
     socklen_t pktSocketAddressLength;
+    int offset;
 
     txMgmt     = &haloUdpCommData.txMgmt;
+    offset = 0;
 
-    if (peek_tx_packet(txMgmt, 0, &data, &dataLen, &seqNum, &pktSocketAddress, &pktSocketAddressLength) == SUCCESS)
+    if (peek_tx_packet(txMgmt, offset, &data, &dataLen, &seqNum, &pktSocketAddress, &pktSocketAddressLength) == SUCCESS)
     {
         //TO DO: Redo how this drops (Make it so that the SeqNumber is actually used to know which packet to drop)
         dequeue_tx_packet(txMgmt, pktSocketAddress, pktSocketAddressLength, seqNum); //Add function to unconditionally drop
@@ -512,7 +516,7 @@ void halo_msg_tx_dropped(void)
         if (haloUdpCommData.userData->debug)
             printf("Dropping msg! Retransmit limit exceeded!\n");
 
-        txMgmt->txRetryCount = 0;
+        reset_tx_retries(txMgmt, offset);
     }
 }
 
@@ -783,9 +787,11 @@ void halo_msg_tick(void)
     UdpCommStruct *commStruct = NULL;
     HaloUdpTxMgmt *txMgmt = NULL;
     int i;
+    int offset;
 
     commStruct = &haloUdpCommData.haloUdpCommStruct;
     txMgmt     = &haloUdpCommData.txMgmt;
+    offset = 0;
 
     udp_tick(commStruct);
 
@@ -794,8 +800,10 @@ void halo_msg_tick(void)
     {
         if (pending_tx_packet(txMgmt))
         {
+            int retries = -1;
             //Rexmit
-            if ((txMgmt->txRetryCount < MAX_REXMIT)&&(MAX_REXMIT > 0))
+            get_tx_retries(txMgmt, offset, &retries);
+            if(( retries < MAX_REXMIT)&&(MAX_REXMIT > 0))
             {
                 halo_msg_rexmit();
             }
@@ -803,7 +811,7 @@ void halo_msg_tick(void)
             {
                 if (haloUdpCommData.userData->dbgTestCtrls.neverTxDrop)
                 {
-                    txMgmt->txRetryCount = 0;
+                    reset_tx_retries(txMgmt, offset);
                 }
                 else
                 {

@@ -18,6 +18,7 @@ typedef struct
     uint16 seqNum;
     struct sockaddr_in socketAddress;
     socklen_t socketAddressLength;
+    uint8 txRetryCount;
 }
 TxEntry;
 
@@ -33,12 +34,13 @@ TxMgmtBuffer;
 #define TX_MGMT_BUFFER_INIT() { \
                                    .arrayHead = 0, \
                                    .arrayTail = 0, \
-                                   .numberOfAllocatedEntries = 0 \
+                                   .numberOfAllocatedEntries = 0, \
                               }
 
 int enqueueBuffer(TxMgmtBuffer *txMgmtBuffer, TxEntry txEntry);
 int dequeueBuffer(TxMgmtBuffer *txMgmtBuffer, int offset);
 int peekBuffer(TxMgmtBuffer *txMgmtBuffer, int offset, TxEntry *txEntry);
+int setBuffer(TxMgmtBuffer *txMgmtBuffer, int offset, TxEntry *txEntry);
 int isBufferEmpty(TxMgmtBuffer *txMgmtBuffer);
 int isBufferFull(TxMgmtBuffer *txMgmtBuffer);
 int bufferSize(TxMgmtBuffer *txMgmtBuffer);

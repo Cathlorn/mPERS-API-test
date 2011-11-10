@@ -20,6 +20,7 @@ int enqueue_tx_packet(HaloUdpTxMgmt *txMgmt, uint8 *data, int len, uint16 seqNum
     entry.seqNum              = seqNum;
     entry.socketAddress       = socketAddress;
     entry.socketAddressLength = socketAddressLength;
+    entry.txRetryCount        = 0;
 
     if (enqueueBuffer(&txMgmt->txMgmtBuffer, entry) == SUCCESS)
     {
@@ -87,4 +88,47 @@ int pending_tx_packet(HaloUdpTxMgmt *txMgmt)
 int tx_packet_queue_size(HaloUdpTxMgmt *txMgmt)
 {
     return bufferSize(&txMgmt->txMgmtBuffer);
+}
+
+//Tx Retry Management
+int reset_tx_retries(HaloUdpTxMgmt *txMgmt, int offset)
+{
+    int result = FAIL;
+    TxEntry entry;
+
+    if (peekBuffer(&txMgmt->txMgmtBuffer, offset, &entry) == SUCCESS)
+    {
+        entry.txRetryCount = 0;
+        result = setBuffer(&txMgmt->txMgmtBuffer, offset, &entry);
+    }
+
+    return result;
+}
+
+int get_tx_retries(HaloUdpTxMgmt *txMgmt, int offset, int *retries)
+{
+    int result = FAIL;
+    TxEntry entry;
+
+    if (peekBuffer(&txMgmt->txMgmtBuffer, offset, &entry) == SUCCESS)
+    {
+        *retries = entry.txRetryCount ;
+        result = setBuffer(&txMgmt->txMgmtBuffer, offset, &entry);
+    }
+
+    return result;
+}
+
+int incr_tx_retries(HaloUdpTxMgmt *txMgmt, int offset)
+{
+    int result = FAIL;
+    TxEntry entry;
+
+    if (peekBuffer(&txMgmt->txMgmtBuffer, offset, &entry) == SUCCESS)
+    {
+        entry.txRetryCount++;
+        result = setBuffer(&txMgmt->txMgmtBuffer, offset, &entry);
+    }
+
+    return result;
 }

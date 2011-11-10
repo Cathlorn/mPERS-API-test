@@ -21,7 +21,7 @@ DynamicVitals;
 //Helper Function to help with dynamic changes
 
 //Populates the structure correctly. Needed since partial xmission is done to save space.
-void pack_DynamicVitals(DynamicVitals *msg, void *dstData);
-void unpack_DynamicVitals(void *srcData, DynamicVitals *msg);
+void pack_DynamicVitals(const DynamicVitals *msg, void *dstData);
+void unpack_DynamicVitals(const void *srcData, DynamicVitals *msg);
 
 #endif //DYNAMIC_VITALS_H
