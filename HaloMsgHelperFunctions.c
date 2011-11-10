@@ -7,6 +7,7 @@
 #include "BatteryInfo.h"
 #include "Location.h"
 #include "PanicMsg.h"
+#include "DynamicVitals.h"
 
 void init_base_message(uint16 commandType, uint8 formatVersion,
                        uint32 timeStamp, uint32 deviceId,
@@ -18,62 +19,6 @@ void init_base_message(uint16 commandType, uint8 formatVersion,
     message->deviceId = deviceId;
 }
 
-#define MAX_STEPS 50
-
-static uint16 stepBuffer[MAX_STEPS];
-
-#define MAX_ACTIVITY 50
-
-static uint16 activityBuffer[MAX_ACTIVITY];
-
-int StepInfo_static_alloc(uint16 *steps, int numberOfSteps, StepInfo *stepInfo)
-{
-    int success = -1;
-
-    if ((numberOfSteps < MAX_STEPS)&&(numberOfSteps >= 0))
-    {
-        //stepInfo->steps = stepBuffer;
-        stepInfo->numberOfEntries = numberOfSteps;
-        memcpy(stepInfo->steps, steps, numberOfSteps*sizeof(uint16));
-        success = 0;
-    }
-
-    return success;
-}
-
-int StepInfo_static_free(StepInfo *stepInfo)
-{
-    int success = -1;
-
-    success = 0;
-
-    return success;
-}
-
-int ActivityInfo_static_alloc(uint16 *activities, int numberOfActivities, ActivityInfo *activityInfo)
-{
-    int success = -1;
-
-    if ((numberOfActivities < MAX_ACTIVITY)&&(numberOfActivities >= 0))
-    {
-        //activityInfo->activities = activityBuffer;
-        activityInfo->numberOfEntries = numberOfActivities;
-        memcpy(activityInfo->activities, activities, numberOfActivities*sizeof(uint16));
-        success = 0;
-    }
-
-    return success;
-}
-
-int ActivityInfo_static_free(ActivityInfo *activityInfo)
-{
-    int success = -1;
-
-    success = 0;
-
-    return success;
-}
-
 int getMsgLength(const HaloMessage *msg)
 {
     int len = -1;
@@ -82,7 +27,7 @@ int getMsgLength(const HaloMessage *msg)
     {
         DynamicVitals dynamicVitalsMsg;
 
-        unpack_DynamicVitals(msg, &dynamicVitalsMsg);
+        unpack_DynamicVitals( (void *) msg, (DynamicVitals *) &dynamicVitalsMsg);
 
         len  = sizeof(HaloMessage);
         len += sizeof(BatteryInfo);
