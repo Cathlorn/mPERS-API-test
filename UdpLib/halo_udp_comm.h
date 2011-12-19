@@ -97,6 +97,8 @@ int halo_msg_session_count(void);
 void halo_msg_report_session(int offset);
 void halo_msg_tick(void);
 
+void halo_msg_cleanup(void);
+
 //Halo UDP Protocol Debug Testing Control functions
 HaloUdpCommDbg get_halo_udp_comm_dbg(void);
 void set_halo_udp_comm_dbg(HaloUdpCommDbg dbgTestCtrls);

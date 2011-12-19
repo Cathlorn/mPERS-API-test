@@ -29,13 +29,11 @@ typedef struct
     uint16 acknowledgementStack[ACK_STACK_SIZE];
     int ackStackSize;
     int ackStackIndex;
-    int32 remoteSession;
     int used;
     int sessionTickCount;
     uint16 txSeqNum;
     int newTxSession; //Indicates that a new session is starting
     enum TxSessionState txSessionState;
-    int32 currentTxSession;
 }
 SessionData;
 
@@ -45,13 +43,11 @@ SessionData;
  .acknowledgementStack = {0}, \
  .ackStackSize  = 0, \
  .ackStackIndex = 0, \
- .remoteSession = -1, \
  .used = 0, \
  .sessionTickCount = 0, \
  .txSeqNum  = 0, \
  .newTxSession = 0, \
  .txSessionState = UNINITIATED, \
- .currentTxSession = -1, \
 }
 
 typedef struct
@@ -123,13 +119,11 @@ void halo_msg_init(HaloUdpUserData *userData)
     {
         haloUdpCommData.sessionData[i].ackStackSize  = 0;
         haloUdpCommData.sessionData[i].ackStackIndex = 0;
-        haloUdpCommData.sessionData[i].remoteSession = -1;
         haloUdpCommData.sessionData[i].used = 0;
         haloUdpCommData.sessionData[i].sessionTickCount = 0;
         haloUdpCommData.sessionData[i].txSeqNum  = 0;
         haloUdpCommData.sessionData[i].newTxSession = 0;
         haloUdpCommData.sessionData[i].txSessionState = UNINITIATED;
-        haloUdpCommData.sessionData[i].currentTxSession = -1;
     }
 
     //Assigns event handlers
@@ -170,12 +164,9 @@ void halo_msg_new_session(int sessionIndex)
     //Check that the session is being used (TO DO: See about returning a failure if not performed)
     if (currentSessionPtr->used)
     {
-        sessionNum = currentSessionPtr->currentTxSession;
         //This handles resetting all of the state information used to keep track of data being exchanged
         currentSessionPtr->newTxSession = 1;
         currentSessionPtr->txSessionState = UNINITIATED;
-        sessionNum++;
-        currentSessionPtr->currentTxSession = (uint32) sessionNum;
         currentSessionPtr->txSeqNum = 0;
 
         //Adjust the Tx Mgmt Queue with new Session information
@@ -196,7 +187,6 @@ void halo_msg_new_session(int sessionIndex)
                     int msgLen;
                     uint16 pktCrc;
 
-                    header->sessionNum = sessionNum;
                     header->seqNum = currentSessionPtr->txSeqNum;
                     currentSessionPtr->txSeqNum++;
 
@@ -255,7 +245,6 @@ int halo_msg_sendto(const HaloMessage *msg,
                 //Set up the acknowledgement queue
                 haloUdpCommData.sessionData[firstAvailableSessionSlot].ackStackSize  = 0;
                 haloUdpCommData.sessionData[firstAvailableSessionSlot].ackStackIndex = 0;
-                haloUdpCommData.sessionData[firstAvailableSessionSlot].remoteSession = -1;
                 haloUdpCommData.sessionData[firstAvailableSessionSlot].sessionTickCount = 0;
                 haloUdpCommData.sessionData[firstAvailableSessionSlot].used = 1;
 
@@ -313,7 +302,6 @@ int halo_msg_send_to_index(const HaloMessage *msg, int sessionIndex)
         memset(&header, 0, sizeof(header));
         header.status |= DATA_AVAILABLE;
         header.payloadLength = payloadLen;
-        header.sessionNum = currentSessionPtr->currentTxSession;
 
         header.seqNum = currentSessionPtr->txSeqNum;
 
@@ -529,8 +517,6 @@ void halo_msg_rexmit(void)
                     {
                         halo_msg_tx_dropped(tempOffset);
                         ////Redo the search each time tx_dropped is called because the queue positions have changed
-                        //txPktQueueSize = tx_packet_queue_size(txMgmt);
-                        //count = 0;
                         tempOffset = (tempOffset + txPktQueueSize - 1) % txPktQueueSize; //Go back by one when dequeuing
                     }
                 }
@@ -690,7 +676,6 @@ void udp_recv_handler(void *data)
             //Set up the acknowledgement queue
             haloUdpCommData.sessionData[firstAvailableSessionSlot].ackStackSize  = 0;
             haloUdpCommData.sessionData[firstAvailableSessionSlot].ackStackIndex = 0;
-            haloUdpCommData.sessionData[firstAvailableSessionSlot].remoteSession = -1;
             haloUdpCommData.sessionData[firstAvailableSessionSlot].sessionTickCount = 0;
             haloUdpCommData.sessionData[firstAvailableSessionSlot].used = 1;
 
@@ -704,32 +689,23 @@ void udp_recv_handler(void *data)
             //Drop packets if we can't handle the sessions
             processPkt = 0;
         }
+
     }
 
     if (processPkt) //Validates the data
     {
-        int newEntry = 0;
         txMgmt     = &haloUdpCommData.txMgmt;
         currentSessionPtr = &haloUdpCommData.sessionData[pktSessionIndex];
         haloUdpCommData.currentSessionIndex = pktSessionIndex; //Saves the current session index being used
 
-        //Immediately update the remote session number if there is none
-        if (currentSessionPtr->remoteSession < 0)
-        {
-            currentSessionPtr->remoteSession = (uint32) header->sessionNum;
-            newEntry = 1;
-        }
-
         //Handles Acknowledgements
         if ((header->status & MSG_RECEIVED_ACK) == MSG_RECEIVED_ACK)
         {
+            //NOTE: Right now, the receive seqNum and sessionNum don't matter for acknowledgements
+            //Make sure protocol stays consistent, should this change
             //Handles with acks to data transmitted from local point
-            ////Only process acknowledgements that match the current session Number
-            if (header->ackSessionNum == currentSessionPtr->currentTxSession)
-            {
-                //Ack Received
-                halo_msg_tx_sent(currentSessionPtr->socketAddr, currentSessionPtr->socketAddrLen, header->ackSeqNum);
-            }
+            //Ack Received
+            halo_msg_tx_sent(currentSessionPtr->socketAddr, currentSessionPtr->socketAddrLen, header->ackSeqNum);
 
             //Handles confirmation of a new local session
             if ((header->status & SESSION_RESTARTED) == SESSION_RESTARTED)
@@ -757,38 +733,21 @@ void udp_recv_handler(void *data)
             int i;
             int tmpStackIndex;
             int duplicateFound = 0;
-            int rejectedSessionDetected = 0;
 
             //Send notification of receipt of ack to server
             HaloUdpAckPkt ackPkt;
             memset(&ackPkt.header, 0, sizeof(ackPkt.header));
             ackPkt.header.status    |= MSG_RECEIVED_ACK;
-            ackPkt.header.ackSessionNum = header->sessionNum;
 
             //Handles notification that a new remote session has started
             if ((header->status & NEW_SESSION) == NEW_SESSION)
             {
-                //Only purge if the 'new' session number is actually different from
-                //what we have recorded (makes sure the 'new' is new)
-                if ((newEntry)||(currentSessionPtr->remoteSession != (uint32) header->sessionNum))
-                {
                     //Purge the acknowledgement stack and confirm start of new session
                     currentSessionPtr->ackStackIndex = 0;
                     currentSessionPtr->ackStackSize  = 0;
 
-                    //Keep track of the new remote session number
-                    currentSessionPtr->remoteSession = (uint32) header->sessionNum;
                     //Indicate confirmation preparing for the new remote session
                     ackPkt.header.status |= SESSION_RESTARTED;
-                }
-                else
-                {
-                    //Refusing to acknowledge the data packet since session number is out of sync.
-                    //Can't trust whether or not this packet is duplicate data.
-                    ackPkt.header.status &= ~MSG_RECEIVED_ACK; //Undo the data acknowledgement
-                    ackPkt.header.status |= SESSION_REJECTED;
-                    rejectedSessionDetected = 1;
-                }
             }
 
             ackPkt.header.ackSeqNum  = header->seqNum;
@@ -799,17 +758,6 @@ void udp_recv_handler(void *data)
             if (haloUdpCommData.userData->dbgTestCtrls.badCrc)
                 ackPkt.crc++;
 
-            //Makes sure the new data is from the current session
-            if (rejectedSessionDetected)
-            {
-                if (udp_sendto(args.commStruct, (uint8 *) &ackPkt, sizeof(ackPkt), &currentSessionPtr->socketAddr, currentSessionPtr->socketAddrLen) > 0)
-                {
-                    //Advance the sequence number
-                    currentSessionPtr->txSeqNum++;
-                }
-            }
-            else if (header->sessionNum == currentSessionPtr->remoteSession) //Do Nothing if session doesn't match
-            {
                 if (!haloUdpCommData.userData->dbgTestCtrls.neverAck)
                 {
                     if (udp_sendto(args.commStruct, (uint8 *) &ackPkt, sizeof(ackPkt), &currentSessionPtr->socketAddr, currentSessionPtr->socketAddrLen) > 0)
@@ -868,7 +816,6 @@ void udp_recv_handler(void *data)
                     if (haloUdpCommData.userData->dbgTestCtrls.loopback)
                         halo_msg_sendto(payloadPtr, args.commStruct->rcvAddrPtr, *args.commStruct->rcvAddrLenPtr);
                 }
-            }
         }
     }
 }
@@ -954,4 +901,8 @@ void halo_msg_report_session(int offset)
             count++;
         }
     }
+}
+
+void halo_msg_cleanup(void)
+{
 }
