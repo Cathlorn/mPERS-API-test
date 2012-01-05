@@ -10,7 +10,7 @@
 #include "../types.h"
 
 int enqueue_tx_packet(HaloUdpTxMgmt *txMgmt, uint8 *data, int len, uint16 seqNum,
-                      struct sockaddr_in socketAddress, socklen_t socketAddressLength)
+                      GenericIP socketAddress)
 {
     int success = FAIL;
     TxEntry entry;
@@ -19,7 +19,6 @@ int enqueue_tx_packet(HaloUdpTxMgmt *txMgmt, uint8 *data, int len, uint16 seqNum
     entry.length              = len;
     entry.seqNum              = seqNum;
     entry.socketAddress       = socketAddress;
-    entry.socketAddressLength = socketAddressLength;
     entry.txRetryCount        = 0;
 
     if (enqueueBuffer(&txMgmt->txMgmtBuffer, entry) == SUCCESS)
@@ -31,7 +30,7 @@ int enqueue_tx_packet(HaloUdpTxMgmt *txMgmt, uint8 *data, int len, uint16 seqNum
 }
 
 int peek_tx_packet(HaloUdpTxMgmt *txMgmt, int offset, uint8 **data, int *len, uint16 *seqNum,
-                   struct sockaddr_in *socketAddress, socklen_t *socketAddressLength)
+                   GenericIP *socketAddress)
 {
     int success = FAIL;
     TxEntry entry;
@@ -42,14 +41,13 @@ int peek_tx_packet(HaloUdpTxMgmt *txMgmt, int offset, uint8 **data, int *len, ui
         *len                 = entry.length;
         *seqNum              = entry.seqNum;
         *socketAddress       = entry.socketAddress;
-        *socketAddressLength = entry.socketAddressLength;
         success = SUCCESS;
     }
 
     return success;
 }
 
-int dequeue_tx_packet(HaloUdpTxMgmt *txMgmt, struct sockaddr_in socketAddress, socklen_t socketAddressLength,
+int dequeue_tx_packet(HaloUdpTxMgmt *txMgmt, GenericIP socketAddress,
                       uint16 seqNum)
 {
     int success = FAIL;
@@ -66,8 +64,8 @@ int dequeue_tx_packet(HaloUdpTxMgmt *txMgmt, struct sockaddr_in socketAddress, s
             if (peekBuffer(&txMgmt->txMgmtBuffer, i, &entry) == SUCCESS)
             {
                 //Make sure that the correct packet is being removed from the tx queue
-                if ((entry.socketAddress.sin_addr.s_addr == socketAddress.sin_addr.s_addr)
-                &&(entry.socketAddress.sin_port == socketAddress.sin_port)
+                if ((entry.socketAddress.address == socketAddress.address)
+                &&(entry.socketAddress.port == socketAddress.port)
                 &&(entry.seqNum == seqNum))
                 {
                     success = dequeueBuffer(&txMgmt->txMgmtBuffer, i);

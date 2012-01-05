@@ -1,8 +1,11 @@
+//MyHalo UDP Protocol Wrapper
+
 #ifndef HALO_UDP_COMM_H
 #define HALO_UDP_COMM_H
 
 #include "../HaloMessage.h"
-#include "udp_lib.h"
+#include "../types.h"
+#include "GenericIP.h"
 
 //Configuration
 
@@ -14,13 +17,6 @@
 #define TICKS_PER_INACTIVE_SESSION  (120 * TICKS_PER_SECOND)
 #define MAX_REXMIT                  10
 #define MAX_CONCURRENT_CONNNECTIONS 2
-//#define TICKS_PER_ACK_DROP 2* (TICKS_PER_REXMIT)*(MAX_REXMIT) //should be twice the time it takes to give up sending something
-
-//Debug settings
-//#define TICKS_PER_REXMIT   10
-//#define MAX_REXMIT         3
-//#define TICKS_PER_MIN      5000
-//#define TICKS_PER_ACK_DROP 2* (TICKS_PER_REXMIT)*(MAX_REXMIT) //should be twice the time it takes to give up sending something
 
 //User Notification
 
@@ -43,7 +39,7 @@ HaloUdpCommDbg;
  .neverTxDrop = 0, \
  .neverAck    = 0, \
  .duplicateTx = 0, \
- .outOfSeqTx = 0, \
+ .outOfSeqTx  = 0, \
 }
 
 typedef struct
@@ -74,16 +70,14 @@ typedef struct
 {
     int dataLength;
     uint8 *data;
-    struct sockaddr_in socketAddress;
-    socklen_t socketAddressLength;
+    GenericIP socketAddress;
 }
 HaloUdpRcvEventData;
 
 #define HALO_UDP_RCV_EVENT_DATA_INIT() { \
  .dataLength = 0, \
  .data = NULL, \
- .socketAddress = {0}, \
- .socketAddressLength = 0, \
+ .socketAddress = GENERIC_IP_INIT(), \
 }
 
 //Operation
@@ -91,12 +85,11 @@ void halo_msg_init(HaloUdpUserData *userData);
 void halo_msg_new_session(int sessionIndex);
 int halo_msg_send(const HaloMessage *msg);
 int halo_msg_sendto(const HaloMessage *msg,
-                    struct sockaddr_in *sockAddrPtr, socklen_t sockAddrLen);
+                    GenericIP socketAddress);
 int halo_msg_send_to_index(const HaloMessage *msg, int sessionIndex);
 int halo_msg_session_count(void);
 void halo_msg_report_session(int offset);
 void halo_msg_tick(void);
-
 void halo_msg_cleanup(void);
 
 //Halo UDP Protocol Debug Testing Control functions

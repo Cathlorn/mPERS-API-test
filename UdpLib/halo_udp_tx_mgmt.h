@@ -1,10 +1,8 @@
 #ifndef HALO_UDP_TX_MGMT_H
 #define HALO_UDP_TX_MGMT_H
 
-
-#include <netinet/in.h>
-
 #include "../types.h"
+#include "GenericIP.h"
 #include "tx_mgmt_buffer.h"
 
 typedef struct
@@ -18,12 +16,12 @@ HaloUdpTxMgmt;
 }
 
 int enqueue_tx_packet(HaloUdpTxMgmt *txMgmt, uint8 *data, int len, uint16 seqNum,
-                      struct sockaddr_in socketAddress, socklen_t socketAddressLength);
+                      GenericIP socketAddress);
 
 int peek_tx_packet(HaloUdpTxMgmt *txMgmt, int offset, uint8 **data, int *len, uint16 *seqNum,
-                   struct sockaddr_in *socketAddress, socklen_t *socketAddressLength);
+                   GenericIP *socketAddress);
 
-int dequeue_tx_packet(HaloUdpTxMgmt *txMgmt, struct sockaddr_in socketAddress, socklen_t socketAddressLength,
+int dequeue_tx_packet(HaloUdpTxMgmt *txMgmt, GenericIP socketAddress,
                       uint16 seqNum);
 
 //Tx Retry Management

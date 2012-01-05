@@ -1,9 +1,8 @@
 #ifndef TX_MGMT_BUFFER_H
 #define TX_MGMT_BUFFER_H
 
-#include <netinet/in.h>
-
 #include "../types.h"
+#include "GenericIP.h"
 
 //Configuration
 #define TX_MGMT_BUFFER_SIZE 7
@@ -16,8 +15,7 @@ typedef struct
     uint8 *data;
     int length;
     uint16 seqNum;
-    struct sockaddr_in socketAddress;
-    socklen_t socketAddressLength;
+    GenericIP socketAddress;
     uint8 txRetryCount;
 }
 TxEntry;

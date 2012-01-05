@@ -24,8 +24,7 @@ enum TxSessionState
 
 typedef struct
 {
-    struct sockaddr_in socketAddr;
-    socklen_t socketAddrLen;
+    GenericIP socketAddr;
     uint16 acknowledgementStack[ACK_STACK_SIZE];
     int ackStackSize;
     int ackStackIndex;
@@ -38,8 +37,7 @@ typedef struct
 SessionData;
 
 #define SESSION_DATA_INIT() { \
- .socketAddr = {0}, \
- .socketAddrLen  = 0, \
+ .socketAddr = GENERIC_IP_INIT(), \
  .acknowledgementStack = {0}, \
  .ackStackSize  = 0, \
  .ackStackIndex = 0, \
@@ -62,7 +60,7 @@ typedef struct
 HaloUdpCommData;
 
 #define HALO_UDP_COMM_DATA_INIT() { \
- .haloUdpCommStruct = {0}, \
+ .haloUdpCommStruct = UDP_COMM_STRUCT_INIT(), \
  .txMgmt = HALO_UDP_TX_MGMT_INIT(), \
  .tickCount = 0, \
  .userData  = NULL, \
@@ -82,10 +80,10 @@ static HaloUdpCommData haloUdpCommData = HALO_UDP_COMM_DATA_INIT();
 //Function Prototypes
 void udp_recv_handler(void *data);
 void halo_msg_rexmit(void);
-int getSessionIndex( struct sockaddr_in socketAddress, socklen_t socketAddressLength, int *sessionIndex);
+int getSessionIndex( GenericIP socketAddress, int *sessionIndex);
 
 //Handler for successfully sent msgs
-void halo_msg_tx_sent( struct sockaddr_in socketAddress, socklen_t socketAddressLength, uint16 txSeqNum);
+void halo_msg_tx_sent( GenericIP socketAddress, uint16 txSeqNum);
 
 //Handler for failed transmitted msgs
 void halo_msg_tx_dropped(int offset);
@@ -136,12 +134,11 @@ void halo_msg_init(HaloUdpUserData *userData)
     if (!userData->actAsServer)
     {
         haloUdpCommData.sessionData[haloUdpCommData.currentSessionIndex].used = 1;
-        haloUdpCommData.sessionData[haloUdpCommData.currentSessionIndex].socketAddr = commStruct->socketAddress;
-        haloUdpCommData.sessionData[haloUdpCommData.currentSessionIndex].socketAddrLen = commStruct->socketAddressLength;
-    }
+        haloUdpCommData.sessionData[haloUdpCommData.currentSessionIndex].socketAddr = commStruct->socketIP;
 
-    //Debug TO DO: Figure out a better way of handling this. (New Session should not require you to know the session index)
-    halo_msg_new_session(haloUdpCommData.currentSessionIndex);
+        //Debug TO DO: Figure out a better way of handling this. (New Session should not require you to know the session index)
+        halo_msg_new_session(haloUdpCommData.currentSessionIndex);
+    }
 }
 
 //NOTE: All sending and receiving of data needs to be halted when this is called
@@ -149,13 +146,11 @@ void halo_msg_init(HaloUdpUserData *userData)
 void halo_msg_new_session(int sessionIndex)
 {
     SessionData *currentSessionPtr = NULL;
-    uint8 sessionNum;
     HaloUdpTxMgmt *txMgmt = NULL;
     uint8 *data;
     int dataLen;
     uint16 seqNum;
-    struct sockaddr_in socketAddress;
-    socklen_t socketAddressLength;
+    GenericIP socketAddress;
     int queueSize;
     int i;
 
@@ -177,10 +172,10 @@ void halo_msg_new_session(int sessionIndex)
         queueSize = tx_packet_queue_size(txMgmt);
         for (i=0; i < queueSize; i++)
         {
-            if (peek_tx_packet(txMgmt, i, &data, &dataLen, &seqNum, &socketAddress, &socketAddressLength) == SUCCESS)
+            if (peek_tx_packet(txMgmt, i, &data, &dataLen, &seqNum, &socketAddress) == SUCCESS)
             {
-                if ((currentSessionPtr->socketAddr.sin_addr.s_addr == socketAddress.sin_addr.s_addr) &&
-                        (currentSessionPtr->socketAddr.sin_port == socketAddress.sin_port) )
+                if ((currentSessionPtr->socketAddr.address == socketAddress.address) &&
+                        (currentSessionPtr->socketAddr.port == socketAddress.port) )
                 {
                     //Reprocess entire packet with new session related information
                     MyHaloUdpHeader *header = (MyHaloUdpHeader *) data;
@@ -206,8 +201,8 @@ void halo_msg_new_session(int sessionIndex)
                     memcpy(&data[msgLen - 2], &pktCrc, sizeof(pktCrc));
 
                     //Put data into new position into the queue
-                    dequeue_tx_packet(txMgmt, socketAddress, socketAddressLength, seqNum); //removes with old seq num
-                    enqueue_tx_packet(txMgmt, data, dataLen, header->seqNum, socketAddress, socketAddressLength); //Adds new seq num
+                    dequeue_tx_packet(txMgmt, socketAddress, seqNum); //removes with old seq num
+                    enqueue_tx_packet(txMgmt, data, dataLen, header->seqNum, socketAddress); //Adds new seq num
                 }
             }
         }
@@ -216,12 +211,12 @@ void halo_msg_new_session(int sessionIndex)
 
 //NOTE: Access in the send queue needs to be thread-protected so that additions/ removal are locked
 int halo_msg_sendto(const HaloMessage *msg,
-                    struct sockaddr_in *sockAddrPtr, socklen_t sockAddrLen)
+                    GenericIP socketAddress)
 {
     int result = FAIL;
     int sessionIndex;
 
-    if (getSessionIndex(*sockAddrPtr, sockAddrLen, &sessionIndex) == SUCCESS)
+    if (getSessionIndex(socketAddress, &sessionIndex) == SUCCESS)
     {
         result = halo_msg_send_to_index(msg, sessionIndex);
     }
@@ -239,8 +234,7 @@ int halo_msg_sendto(const HaloMessage *msg,
                 firstAvailableSessionSlot = i;
 
                 //Save IP
-                haloUdpCommData.sessionData[firstAvailableSessionSlot].socketAddr = *sockAddrPtr;
-                haloUdpCommData.sessionData[firstAvailableSessionSlot].socketAddrLen = sockAddrLen;
+                haloUdpCommData.sessionData[firstAvailableSessionSlot].socketAddr = socketAddress;
 
                 //Set up the acknowledgement queue
                 haloUdpCommData.sessionData[firstAvailableSessionSlot].ackStackSize  = 0;
@@ -324,11 +318,11 @@ int halo_msg_send_to_index(const HaloMessage *msg, int sessionIndex)
         else
             currentSessionPtr->txSeqNum++;
 
-        if (enqueue_tx_packet(txMgmt, data, msgLen, header.seqNum, currentSessionPtr->socketAddr, currentSessionPtr->socketAddrLen) == SUCCESS)
+        if (enqueue_tx_packet(txMgmt, data, msgLen, header.seqNum, currentSessionPtr->socketAddr) == SUCCESS)
         {
             result = SUCCESS;
             if (haloUdpCommData.userData->dbgTestCtrls.duplicateTx)
-                enqueue_tx_packet(txMgmt, data, msgLen, header.seqNum, currentSessionPtr->socketAddr, currentSessionPtr->socketAddrLen);
+                enqueue_tx_packet(txMgmt, data, msgLen, header.seqNum, currentSessionPtr->socketAddr);
         }
         else
         {
@@ -340,7 +334,7 @@ int halo_msg_send_to_index(const HaloMessage *msg, int sessionIndex)
     return result;
 }
 
-int getSessionIndex( struct sockaddr_in socketAddress, socklen_t socketAddressLength, int *sessionIndex)
+int getSessionIndex( GenericIP socketAddress, int *sessionIndex)
 {
     int result = FAIL;
     int i;
@@ -353,8 +347,8 @@ int getSessionIndex( struct sockaddr_in socketAddress, socklen_t socketAddressLe
         if (haloUdpCommData.sessionData[i].used)
         {
             //Checks that IPs match (received data and IP/port tied to session entry)
-            if ((haloUdpCommData.sessionData[i].socketAddr.sin_addr.s_addr == socketAddress.sin_addr.s_addr) &&
-                    (haloUdpCommData.sessionData[i].socketAddr.sin_port == socketAddress.sin_port) )
+            if ((haloUdpCommData.sessionData[i].socketAddr.address == socketAddress.address) &&
+                    (haloUdpCommData.sessionData[i].socketAddr.port == socketAddress.port) )
             {
                 haloUdpCommData.sessionData[i].sessionTickCount = 0; //Reset the inactivity count
                 *sessionIndex = i;
@@ -393,8 +387,7 @@ void halo_msg_rexmit(void)
     int dataLen;
     uint16 seqNum;
     int sessionIndex;
-    struct sockaddr_in socketAddress;
-    socklen_t socketAddressLength;
+    GenericIP socketAddress;
     int txPktQueueSize;
     int count;
     int retries = -1;
@@ -413,12 +406,12 @@ void halo_msg_rexmit(void)
         //Send everything that's presently available in the queue (giant burst of UDP)
         for (count = 0; (count < MAX_BURST_SIZE)&&(count < txPktQueueSize); count++)
         {
-            if (peek_tx_packet(txMgmt, burstOffset, &data, &dataLen, &seqNum, &socketAddress, &socketAddressLength) == SUCCESS)
+            if (peek_tx_packet(txMgmt, burstOffset, &data, &dataLen, &seqNum, &socketAddress) == SUCCESS)
             {
                 get_tx_retries(txMgmt, burstOffset, &retries);
                 if (( retries < MAX_REXMIT)&&(MAX_REXMIT > 0))
                 {
-                    if (getSessionIndex(socketAddress, socketAddressLength, &sessionIndex) == SUCCESS)
+                    if (getSessionIndex(socketAddress, &sessionIndex) == SUCCESS)
                     {
                         int allowSend = 0;
 
@@ -465,7 +458,7 @@ void halo_msg_rexmit(void)
                         if (allowSend) //Only send when not in a new session or the first packet in a new session
                         {
                             //Data transmission happens from here
-                            udp_sendto(commStruct, data, dataLen, &currentSessionPtr->socketAddr, currentSessionPtr->socketAddrLen);
+                            udp_sendto(commStruct, data, dataLen, currentSessionPtr->socketAddr);
 
                             incr_tx_retries(txMgmt, burstOffset);
                         }
@@ -490,7 +483,7 @@ void halo_msg_rexmit(void)
                         //Unless it go the info from a handler
 
                         //Data transmission happens from here
-                        udp_sendto(commStruct, data, dataLen, &socketAddress, socketAddressLength);
+                        udp_sendto(commStruct, data, dataLen, socketAddress);
 
                         incr_tx_retries(txMgmt, burstOffset);
                     }
@@ -504,7 +497,7 @@ void halo_msg_rexmit(void)
         //Send everything that's presently available in the queue (giant burst of UDP)
         for (count = 0; (count < MAX_BURST_SIZE)&&(count < txPktQueueSize); count++)
         {
-            if (peek_tx_packet(txMgmt, tempOffset, &data, &dataLen, &seqNum, &socketAddress, &socketAddressLength) == SUCCESS)
+            if (peek_tx_packet(txMgmt, tempOffset, &data, &dataLen, &seqNum, &socketAddress) == SUCCESS)
             {
                 get_tx_retries(txMgmt, tempOffset, &retries);
                 if (( retries >= MAX_REXMIT)||(MAX_REXMIT <= 0))
@@ -528,14 +521,13 @@ void halo_msg_rexmit(void)
 }
 
 //Handler for successfully sent msgs
-void halo_msg_tx_sent( struct sockaddr_in socketAddress, socklen_t socketAddressLength, uint16 txSeqNum)
+void halo_msg_tx_sent( GenericIP socketAddress, uint16 txSeqNum)
 {
     HaloUdpTxMgmt *txMgmt = NULL;
     uint8 *data;
     int dataLen;
     uint16 seqNum;
-    struct sockaddr_in pktSocketAddress;
-    socklen_t pktSocketAddressLength;
+    GenericIP pktSocketAddress;
     int i;
     int queueSize;
 
@@ -546,13 +538,13 @@ void halo_msg_tx_sent( struct sockaddr_in socketAddress, socklen_t socketAddress
     queueSize = tx_packet_queue_size(txMgmt);
     for (i=0; i < queueSize; i++)
     {
-        if (peek_tx_packet(txMgmt, i, &data, &dataLen, &seqNum, &pktSocketAddress, &pktSocketAddressLength) == SUCCESS)
+        if (peek_tx_packet(txMgmt, i, &data, &dataLen, &seqNum, &pktSocketAddress) == SUCCESS)
         {
-            if ((socketAddress.sin_addr.s_addr == pktSocketAddress.sin_addr.s_addr) &&
-                    (socketAddress.sin_port == pktSocketAddress.sin_port)&&(txSeqNum == seqNum))
+            if ((socketAddress.address == pktSocketAddress.address) &&
+                    (socketAddress.port == pktSocketAddress.port)&&(txSeqNum == seqNum))
             {
                 //TO DO: Redo how this drops
-                dequeue_tx_packet(txMgmt, pktSocketAddress, pktSocketAddressLength, txSeqNum); //Add function to unconditionally drop
+                dequeue_tx_packet(txMgmt, pktSocketAddress, txSeqNum); //Add function to unconditionally drop
 
                 //Notify to user that msg has been sent
                 if (haloUdpCommData.userData)
@@ -576,15 +568,14 @@ void halo_msg_tx_dropped(int offset)
     uint8 *data;
     int dataLen;
     uint16 seqNum;
-    struct sockaddr_in pktSocketAddress;
-    socklen_t pktSocketAddressLength;
+    GenericIP pktSocketAddress;
 
     txMgmt     = &haloUdpCommData.txMgmt;
 
-    if (peek_tx_packet(txMgmt, offset, &data, &dataLen, &seqNum, &pktSocketAddress, &pktSocketAddressLength) == SUCCESS)
+    if (peek_tx_packet(txMgmt, offset, &data, &dataLen, &seqNum, &pktSocketAddress) == SUCCESS)
     {
         //TO DO: Redo how this drops (Make it so that the SeqNumber is actually used to know which packet to drop)
-        dequeue_tx_packet(txMgmt, pktSocketAddress, pktSocketAddressLength, seqNum); //Add function to unconditionally drop
+        dequeue_tx_packet(txMgmt, pktSocketAddress, seqNum); //Add function to unconditionally drop
 
         //Notify to user that msg has been dropped
         haloUdpCommData.userData->msg_tx_dropped(&data[sizeof(MyHaloUdpHeader)]);
@@ -646,8 +637,8 @@ void udp_recv_handler(void *data)
             if (haloUdpCommData.sessionData[i].used)
             {
                 //Checks that IPs match (received data and IP/port tied to session entry)
-                if ((args.commStruct->rcvAddrPtr->sin_addr.s_addr == haloUdpCommData.sessionData[i].socketAddr.sin_addr.s_addr) &&
-                        (args.commStruct->rcvAddrPtr->sin_port == haloUdpCommData.sessionData[i].socketAddr.sin_port) )
+                if ((args.commStruct->rcvIP.address == haloUdpCommData.sessionData[i].socketAddr.address) &&
+                        (args.commStruct->rcvIP.port == haloUdpCommData.sessionData[i].socketAddr.port) )
                 {
                     haloUdpCommData.sessionData[i].sessionTickCount = 0; //Reset the inactivity count
                     pktSessionIndex = i;
@@ -670,8 +661,7 @@ void udp_recv_handler(void *data)
         else if (firstAvailableSessionSlot >= 0)
         {
             //Save IP
-            haloUdpCommData.sessionData[firstAvailableSessionSlot].socketAddr = *args.commStruct->rcvAddrPtr;
-            haloUdpCommData.sessionData[firstAvailableSessionSlot].socketAddrLen = *args.commStruct->rcvAddrLenPtr;
+            haloUdpCommData.sessionData[firstAvailableSessionSlot].socketAddr = args.commStruct->rcvIP;
 
             //Set up the acknowledgement queue
             haloUdpCommData.sessionData[firstAvailableSessionSlot].ackStackSize  = 0;
@@ -705,7 +695,7 @@ void udp_recv_handler(void *data)
             //Make sure protocol stays consistent, should this change
             //Handles with acks to data transmitted from local point
             //Ack Received
-            halo_msg_tx_sent(currentSessionPtr->socketAddr, currentSessionPtr->socketAddrLen, header->ackSeqNum);
+            halo_msg_tx_sent(currentSessionPtr->socketAddr, header->ackSeqNum);
 
             //Handles confirmation of a new local session
             if ((header->status & SESSION_RESTARTED) == SESSION_RESTARTED)
@@ -760,7 +750,7 @@ void udp_recv_handler(void *data)
 
                 if (!haloUdpCommData.userData->dbgTestCtrls.neverAck)
                 {
-                    if (udp_sendto(args.commStruct, (uint8 *) &ackPkt, sizeof(ackPkt), &currentSessionPtr->socketAddr, currentSessionPtr->socketAddrLen) > 0)
+                    if (udp_sendto(args.commStruct, (uint8 *) &ackPkt, sizeof(ackPkt), currentSessionPtr->socketAddr) > 0)
                     {
                         //Advance the sequence number
                         currentSessionPtr->txSeqNum++;
@@ -809,12 +799,11 @@ void udp_recv_handler(void *data)
                     //Notify that new data has been received
                     rcvEventData.data = payloadPtr;
                     rcvEventData.dataLength = payloadLength;
-                    rcvEventData.socketAddress = *args.commStruct->rcvAddrPtr;
-                    rcvEventData.socketAddressLength = *args.commStruct->rcvAddrLenPtr;
+                    rcvEventData.socketAddress = args.commStruct->rcvIP;
                     haloUdpCommData.userData->msg_rx_received(&rcvEventData);
 
                     if (haloUdpCommData.userData->dbgTestCtrls.loopback)
-                        halo_msg_sendto(payloadPtr, args.commStruct->rcvAddrPtr, *args.commStruct->rcvAddrLenPtr);
+                        halo_msg_sendto((HaloMessage *) payloadPtr, args.commStruct->rcvIP);
                 }
         }
     }
@@ -893,8 +882,8 @@ void halo_msg_report_session(int offset)
             if (count == offset)
             {
                 printf("sessionIndex: %d\n", i);
-                printf("IP: 0x%x\n", haloUdpCommData.sessionData[i].socketAddr.sin_addr.s_addr);
-                printf("Port: %d\n", haloUdpCommData.sessionData[i].socketAddr.sin_port);
+                printf("IP: 0x%x\n", haloUdpCommData.sessionData[i].socketAddr.address);
+                printf("Port: %d\n", haloUdpCommData.sessionData[i].socketAddr.port);
                 printf("ticks inactive: %d\n", haloUdpCommData.sessionData[i].sessionTickCount);
                 printf("\n");
             }
@@ -905,4 +894,9 @@ void halo_msg_report_session(int offset)
 
 void halo_msg_cleanup(void)
 {
+    UdpCommStruct *commStruct = NULL;
+
+    commStruct = &haloUdpCommData.haloUdpCommStruct;
+
+    udp_cleanup(commStruct);
 }

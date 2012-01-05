@@ -13,7 +13,7 @@ server_tests.c \
 tests.c \
 UdpLib/halo_udp_tx_mgmt.c \
 UdpLib/tx_mgmt_buffer.c \
-UdpLib/udp_lib.c \
+UdpLib/udp_lib_posix_socket_impl.c \
 UdpLib/halo_udp_comm.c \
 UdpLib/tx_buffer_static.c \
 UdpLib/crc16.c

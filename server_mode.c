@@ -32,7 +32,7 @@ void server_myhalo_udp_msg_rcvd(void *data)
 
         //Send back the same data
         //halo_msg_send(msg);
-        halo_msg_sendto(msg, &rcvEventData->socketAddress, rcvEventData->socketAddressLength);
+        halo_msg_sendto(msg, rcvEventData->socketAddress);
 
         //Read the structure correctly
         unpack_DynamicVitals(msg, &dynamicVitals);
@@ -42,8 +42,8 @@ void server_myhalo_udp_msg_rcvd(void *data)
             printf("Dynamic Vitals msg received!\n");
             printf("Step upload Frequency: %d\n", dynamicVitals.stepData.updateFrequency);
             printf("Activity sample Frequency: %d\n", dynamicVitals.activityData.sampleFrequency);
-            printf("SrcIp: 0x%x\n", rcvEventData->socketAddress.sin_addr.s_addr);
-            printf("SrcPort: %d\n", rcvEventData->socketAddress.sin_port);
+            printf("SrcIp: 0x%x\n", rcvEventData->socketAddress.address);
+            printf("SrcPort: %d\n", rcvEventData->socketAddress.port);
         }
     }
     else if (msg->commandType == CRITICAL_ALERT)

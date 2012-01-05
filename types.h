@@ -1,6 +1,8 @@
 #ifndef TYPES_H
 #define TYPES_H
 
+typedef void ( *NotifierFunction ) ( void * );
+
 #define SUCCESS 0
 #define FAIL    -1
 

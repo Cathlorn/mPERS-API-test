@@ -27,7 +27,7 @@ int getMsgLength(const HaloMessage *msg)
     {
         DynamicVitals dynamicVitalsMsg;
 
-        unpack_DynamicVitals( (void *) msg, (DynamicVitals *) &dynamicVitalsMsg);
+        unpack_DynamicVitals( (const void *) msg, (DynamicVitals *) &dynamicVitalsMsg);
 
         len  = sizeof(HaloMessage);
         len += sizeof(BatteryInfo);
