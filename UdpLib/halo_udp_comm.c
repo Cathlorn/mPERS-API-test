@@ -74,6 +74,11 @@ typedef struct
 }
 HaloUdpAckPkt;
 
+#define HALO_UDP_ACK_PKT_INIT() { \
+ .header       = MY_HALO_UDP_HEADER_INIT(), \
+ .crc          = 0, \
+}
+
 //Stores the data used to handle the halo UDP communications stack
 static HaloUdpCommData haloUdpCommData = HALO_UDP_COMM_DATA_INIT();
 
@@ -262,7 +267,7 @@ int halo_msg_send(const HaloMessage *msg)
 int halo_msg_send_to_index(const HaloMessage *msg, int sessionIndex)
 {
     SessionData *currentSessionPtr = NULL;
-    MyHaloUdpHeader header;
+    MyHaloUdpHeader header = MY_HALO_UDP_HEADER_INIT();
     UdpCommStruct *commStruct = NULL;
     HaloUdpTxMgmt *txMgmt = NULL;
     int msgLen;
@@ -292,8 +297,6 @@ int halo_msg_send_to_index(const HaloMessage *msg, int sessionIndex)
             assert(0);
         }
 
-        //Fill header with all zeroes
-        memset(&header, 0, sizeof(header));
         header.status |= DATA_AVAILABLE;
         header.payloadLength = payloadLen;
 
@@ -725,8 +728,7 @@ void udp_recv_handler(void *data)
             int duplicateFound = 0;
 
             //Send notification of receipt of ack to server
-            HaloUdpAckPkt ackPkt;
-            memset(&ackPkt.header, 0, sizeof(ackPkt.header));
+            HaloUdpAckPkt ackPkt = HALO_UDP_ACK_PKT_INIT();
             ackPkt.header.status    |= MSG_RECEIVED_ACK;
 
             //Handles notification that a new remote session has started
@@ -742,7 +744,7 @@ void udp_recv_handler(void *data)
 
             ackPkt.header.ackSeqNum  = header->seqNum;
             ackPkt.header.seqNum     = currentSessionPtr->txSeqNum;
-            ackPkt.crc = hdlcFcs16(hdlc_init_fcs16, &ackPkt, sizeof(ackPkt) - sizeof(uint16));
+            ackPkt.crc = hdlcFcs16(hdlc_init_fcs16, (const uint8 *) &ackPkt, sizeof(ackPkt) - sizeof(uint16));
 
             //Intentionally make CRCs bad
             if (haloUdpCommData.userData->dbgTestCtrls.badCrc)

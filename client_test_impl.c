@@ -12,7 +12,7 @@
 
 void sendDynamicVitalsPkt(void)
 {
-    DynamicVitals dynamicVitalsMsg = {0};
+    DynamicVitals dynamicVitalsMsg = DYNAMIC_VITALS_MESSAGE_INIT();
     uint16 steps[] = {1,2,3,4,5,6,7,8,9,10};
     uint16 activities[] = {1,2,3,4,5,6,7,8,9,10};
     uint8 dynamicVitalsBuffer[sizeof(DynamicVitals)];
@@ -51,12 +51,9 @@ void sendDynamicVitalsPkt(void)
 
 void sendPanicMsgPkt(void)
 {
-    PanicMsg panicMsg = {0};
-    //Set the base parameters for the message
-    init_base_message(CRITICAL_ALERT, 7, time(NULL), 317, (HaloMessage *) &panicMsg);
-    panicMsg.criticalAlertBaseMsg.criticalAlertType = PANIC;
+    PanicMsg panicMsg = PANIC_MESSAGE_INIT();
 
-    //Location
+    init_base_message(CRITICAL_ALERT, 7, time(NULL), 317, (HaloMessage *) &panicMsg);
     panicMsg.criticalAlertBaseMsg.currentLocation.latitude = -750;
     panicMsg.criticalAlertBaseMsg.currentLocation.longitude = 132;
     panicMsg.criticalAlertBaseMsg.currentLocation.altitude = -493;

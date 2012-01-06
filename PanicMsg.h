@@ -12,4 +12,10 @@ typedef struct
 }
 PanicMsg; //48 bytes
 
+#define PANIC_MESSAGE_INIT() { \
+                            .criticalAlertBaseMsg = CRITICAL_ALERT_INIT(PANIC), \
+                            .durationPress = 0, \
+                            .reserved = {0}, \
+                          }
+
 #endif //PANIC_MSG_H

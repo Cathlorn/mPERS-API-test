@@ -15,6 +15,7 @@ GenericIP;
 #define GENERIC_IP_INIT() { \
  .address     = 0, \
  .port        = 0, \
+ .reserved    = {0}, \
 }
 
 #endif //GENERIC_IP_H

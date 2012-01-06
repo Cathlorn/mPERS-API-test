@@ -45,6 +45,18 @@ typedef struct
 }
 CriticalAlert;  //Total: 44 bytes
 
+#define CRITICAL_ALERT_INIT(a) { \
+                                .baseMessage = HALO_MESSAGE_INIT(CRITICAL_ALERT, 0, 0, 0), \
+                                .currentLocation = LOCATION_INIT(0, 0, 0, 0), \
+                                .nadTimestamp = 0, \
+                                .signalStrength = 0, \
+                                .criticalAlertType = a, \
+                                .retryNumber = 0, \
+                                .resolveMethod = 0, \
+                                .resolveReason = 0, \
+                                .resolvedTimestamp = 0, \
+                          }
+
 //Helper Functions
 
 #endif //CRITICAL_ALERT_H

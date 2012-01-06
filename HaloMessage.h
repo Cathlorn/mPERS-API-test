@@ -14,4 +14,12 @@ typedef struct _HaloMessage
     uint32 time;              //Needs to be at least this size whatever we use
 } HaloMessage;
 
+#define HALO_MESSAGE_INIT(a,b,c,d) { \
+ .commandType = a, \
+ .formatVersion = b, \
+ .reserved = {0}, \
+ .deviceId = c, \
+ .time = d, \
+}
+
 #endif //HALO_MESSAGE_H

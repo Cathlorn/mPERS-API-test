@@ -12,4 +12,12 @@ typedef struct _Location
     uint8  reserved[2];
 } Location;
 
+#define LOCATION_INIT(a,b,c,d) { \
+ .latitude = a, \
+ .longitude = b, \
+ .altitude = c, \
+ .accuracy = d, \
+ .reserved = {0}, \
+}
+
 #endif //LOCATION_H

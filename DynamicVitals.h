@@ -18,6 +18,14 @@ typedef struct _DynamicVitals
 }
 DynamicVitals;
 
+#define DYNAMIC_VITALS_MESSAGE_INIT() { \
+                                .baseMessage = HALO_MESSAGE_INIT(ALL_DATA_DYNAMIC, 0, 0, 0), \
+                                .battInfo = BATTERY_INFO_INIT(), \
+                                .currentLocation = LOCATION_INIT(0, 0, 0, 0), \
+                                .stepData = STEP_INFO_INIT(), \
+                                .activityData = ACTIVITY_INFO_INIT(), \
+                          }
+
 //Helper Function to help with dynamic changes
 
 //Populates the structure correctly. Needed since partial xmission is done to save space.

@@ -25,5 +25,15 @@ typedef struct _BatteryInfo
 }
 BatteryInfo;
 
+#define BATTERY_INFO_INIT() { \
+ .timeRemaining  = 0, \
+ .battPercentage = 0, \
+ .unusedBits = 0, \
+ .status = 0, \
+ .chargeComplete = 0, \
+ .charging = 0, \
+ .plugged = 0, \
+}
+
 
 #endif //BATTERY_INFO_H

@@ -9,7 +9,7 @@
 #define SESSION_RESTARTED 8   //Confirms that a session was successfully restarted
 #define SESSION_REJECTED  16  //Rejects the proposed session number
 
-typedef struct _MyHaloUdpHeader
+typedef struct
 {
     uint8  status;
     uint8  mgmt;
@@ -21,5 +21,16 @@ typedef struct _MyHaloUdpHeader
     uint8  reserved2[2];
 }
 MyHaloUdpHeader;
+
+#define MY_HALO_UDP_HEADER_INIT() { \
+ .status        = 0, \
+ .mgmt          = 0, \
+ .seqNum        = 0, \
+ .ackSeqNum     = 0, \
+ .sessionNum    = 0, \
+ .ackSessionNum = 0, \
+ .payloadLength = 0, \
+ .reserved2     = {0}, \
+}
 
 #endif //MY_HALO_UDP_H
