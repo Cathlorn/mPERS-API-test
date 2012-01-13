@@ -1,9 +1,9 @@
 #include <string.h>
 
-#include "DynamicVitals.h"
+#include "DynamicVitalsMsg.h"
 
 //Populates the structure correctly. Needed since partial xmission is done to save space.
-void pack_DynamicVitals(const DynamicVitals *msg, void *dstData)
+void pack_DynamicVitalsMsg(const DynamicVitalsMsg *msg, void *dstData)
 {
     StepInfo *stepInfoPtr;
     ActivityInfo *activityInfoPtr;
@@ -35,9 +35,9 @@ void pack_DynamicVitals(const DynamicVitals *msg, void *dstData)
     memcpy(&activityInfoPtr->activities[0], &msg->activityData.activities[0], sizeof(uint16)*msg->activityData.numberOfEntries);
 }
 
-void unpack_DynamicVitals(const void *srcData, DynamicVitals *msg)
+void unpack_DynamicVitalsMsg(const void *srcData, DynamicVitalsMsg *msg)
 {
-    DynamicVitals *srcMsg = (DynamicVitals *) srcData;
+    DynamicVitalsMsg *srcMsg = (DynamicVitalsMsg *) srcData;
     StepInfo *stepInfoPtr;
     ActivityInfo *activityInfoPtr;
     uint8 *dataPtr;

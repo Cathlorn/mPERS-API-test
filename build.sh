@@ -1,11 +1,15 @@
 #CC=arm-elf-gcc
 CC=$1
 
+#Defaults to 'gcc' if no compiler is given
+if [ "$CC" = "" ]; then
+CC=gcc
+fi
+
 $CC -lpthread -o halo_udp_test client_mode.c \
 client_test_impl.c \
 client_tests.c \
-CriticalAlert.c \
-DynamicVitals.c \
+DynamicVitalsMsg.c \
 HaloMsgHelperFunctions.c \
 main.c \
 server_mode.c \

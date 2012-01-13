@@ -6,8 +6,8 @@
 #include "types.h"
 
 #include "Location.h"
-#include "DynamicVitals.h"
-#include "CriticalAlert.h"
+#include "DynamicVitalsMsg.h"
+#include "CriticalAlertMsg.h"
 #include "UdpLib/myHaloUdp.h"
 #include "HaloMsgHelperFunctions.h"
 #include "HaloMessageTypes.h"
@@ -28,20 +28,20 @@ void server_myhalo_udp_msg_rcvd(void *data)
 
     if (msg->commandType == ALL_DATA_DYNAMIC)
     {
-        DynamicVitals dynamicVitals;
+        DynamicVitalsMsg dynamicVitalsMsg;
 
         //Send back the same data
         //halo_msg_send(msg);
         halo_msg_sendto(msg, rcvEventData->socketAddress);
 
         //Read the structure correctly
-        unpack_DynamicVitals(msg, &dynamicVitals);
+        unpack_DynamicVitalsMsg(msg, &dynamicVitalsMsg);
 
         if (serverDebug)
         {
             printf("Dynamic Vitals msg received!\n");
-            printf("Step upload Frequency: %d\n", dynamicVitals.stepData.updateFrequency);
-            printf("Activity sample Frequency: %d\n", dynamicVitals.activityData.sampleFrequency);
+            printf("Step upload Frequency: %d\n", dynamicVitalsMsg.stepData.updateFrequency);
+            printf("Activity sample Frequency: %d\n", dynamicVitalsMsg.activityData.sampleFrequency);
             printf("SrcIp: 0x%x\n", rcvEventData->socketAddress.address);
             printf("SrcPort: %d\n", rcvEventData->socketAddress.port);
         }
@@ -50,7 +50,7 @@ void server_myhalo_udp_msg_rcvd(void *data)
     {
         if (serverDebug)
         {
-            CriticalAlert *criticalAlertMsg = (CriticalAlert *) msg;
+            CriticalAlertMsg *criticalAlertMsg = (CriticalAlertMsg *) msg;
             printf("Critical Alert msg Received!\n");
             printf("Critical Alert type: %d\n", criticalAlertMsg->criticalAlertType);
         }

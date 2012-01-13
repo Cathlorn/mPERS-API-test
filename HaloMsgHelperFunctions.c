@@ -6,8 +6,9 @@
 #include "HaloMessageTypes.h"
 #include "BatteryInfo.h"
 #include "Location.h"
-#include "PanicMsg.h"
-#include "DynamicVitals.h"
+#include "DynamicVitalsMsg.h"
+#include "CriticalAlertMsg.h"
+#include "ResolvedEventMsg.h"
 
 void init_base_message(uint16 commandType, uint8 formatVersion,
                        uint32 timeStamp, uint32 deviceId,
@@ -25,9 +26,9 @@ int getMsgLength(const HaloMessage *msg)
 
     if (msg->commandType == ALL_DATA_DYNAMIC)
     {
-        DynamicVitals dynamicVitalsMsg;
+        DynamicVitalsMsg dynamicVitalsMsg;
 
-        unpack_DynamicVitals( (const void *) msg, (DynamicVitals *) &dynamicVitalsMsg);
+        unpack_DynamicVitalsMsg( (const void *) msg, (DynamicVitalsMsg *) &dynamicVitalsMsg);
 
         len  = sizeof(HaloMessage);
         len += sizeof(BatteryInfo);
@@ -37,25 +38,32 @@ int getMsgLength(const HaloMessage *msg)
     }
     else if(msg->commandType == CRITICAL_ALERT)
     {
-        CriticalAlert *criticalAlertMsg = (CriticalAlert *) msg;
+        CriticalAlertMsg *criticalAlertMsg = (CriticalAlertMsg *) msg;
 
-        if(criticalAlertMsg->criticalAlertType == FALL)
+        if((criticalAlertMsg->criticalAlertType == FALL)||
+           (criticalAlertMsg->criticalAlertType == PANIC) ||
+           (criticalAlertMsg->criticalAlertType == OPERATOR_ACK))
         {
-            printf("Format (%d) presently not supported.\n", criticalAlertMsg->criticalAlertType);
-            assert(0);
-        }
-        else if(criticalAlertMsg->criticalAlertType == PANIC)
-        {
-            len = sizeof(PanicMsg);
-        }
-        else if(criticalAlertMsg->criticalAlertType == CLEAR)
-        {
-            printf("Format (%d) presently not supported.\n", criticalAlertMsg->criticalAlertType);
-            assert(0);
+           len = sizeof(CriticalAlertMsg);
         }
         else
         {
             printf("Invalid Alert Type: %d\n", criticalAlertMsg->criticalAlertType);
+            assert(0);
+        }
+    }
+    else if(msg->commandType == RESOLVED_EVENT)
+    {
+        ResolvedEventMsg *resolvedEventMsg = (ResolvedEventMsg *) msg;
+
+        if((resolvedEventMsg->resolvedEventType == RESOLVED_FALL)||
+           (resolvedEventMsg->resolvedEventType == RESOLVED_PANIC))
+        {
+           len = sizeof(ResolvedEventMsg);
+        }
+        else
+        {
+            printf("Invalid Alert Type: %d\n", resolvedEventMsg->resolvedEventType);
             assert(0);
         }
     }

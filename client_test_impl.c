@@ -4,18 +4,18 @@
 
 #include "HaloMessageTypes.h"
 #include "HaloMsgHelperFunctions.h"
-#include "DynamicVitals.h"
-#include "PanicMsg.h"
+#include "DynamicVitalsMsg.h"
+#include "CriticalAlertMsg.h"
 #include "UdpLib/halo_udp_comm.h"
 
 #include "client_test_impl.h"
 
 void sendDynamicVitalsPkt(void)
 {
-    DynamicVitals dynamicVitalsMsg = DYNAMIC_VITALS_MESSAGE_INIT();
+    DynamicVitalsMsg dynamicVitalsMsg = DYNAMIC_VITALS_MSG_INIT();
     uint16 steps[] = {1,2,3,4,5,6,7,8,9,10};
     uint16 activities[] = {1,2,3,4,5,6,7,8,9,10};
-    uint8 dynamicVitalsBuffer[sizeof(DynamicVitals)];
+    uint8 dynamicVitalsBuffer[sizeof(DynamicVitalsMsg)]; //Created to be this size since the packed version should always be the same or smaller than the full msg version
 
     //Set the base parameters for the message
     init_base_message(ALL_DATA_DYNAMIC, 3, time(NULL), 518, (HaloMessage *) &dynamicVitalsMsg);
@@ -32,18 +32,19 @@ void sendDynamicVitalsPkt(void)
     dynamicVitalsMsg.activityData.numberOfEntries = (sizeof(activities) / sizeof(uint16));
     memcpy(dynamicVitalsMsg.activityData.activities, activities, sizeof(activities));
 
-    dynamicVitalsMsg.battInfo.timeRemaining = 50;
+    dynamicVitalsMsg.battInfo.minRemaining = 50;
     dynamicVitalsMsg.battInfo.battPercentage = 17;
     dynamicVitalsMsg.battInfo.charging = 1;
     dynamicVitalsMsg.battInfo.plugged = 1;
+    dynamicVitalsMsg.battInfo.battVoltage = 3000;
 
     dynamicVitalsMsg.currentLocation.latitude = 860;
     dynamicVitalsMsg.currentLocation.longitude = -321;
-    dynamicVitalsMsg.currentLocation.altitude = 315;
+    dynamicVitalsMsg.currentLocation.elevation = 315;
     dynamicVitalsMsg.currentLocation.accuracy = 109;
 
     //Compress contents of structure into a minimal byte stream for transmission
-    pack_DynamicVitals(&dynamicVitalsMsg, dynamicVitalsBuffer);
+    pack_DynamicVitalsMsg(&dynamicVitalsMsg, dynamicVitalsBuffer);
 
     //Do a generic send with vitals msg
     halo_msg_send((HaloMessage *) dynamicVitalsBuffer);
@@ -51,15 +52,45 @@ void sendDynamicVitalsPkt(void)
 
 void sendPanicMsgPkt(void)
 {
-    PanicMsg panicMsg = PANIC_MESSAGE_INIT();
+    CriticalAlertMsg panicMsg = CRITICAL_ALERT_MSG_INIT(PANIC);
 
-    init_base_message(CRITICAL_ALERT, 7, time(NULL), 317, (HaloMessage *) &panicMsg);
-    panicMsg.criticalAlertBaseMsg.currentLocation.latitude = -750;
-    panicMsg.criticalAlertBaseMsg.currentLocation.longitude = 132;
-    panicMsg.criticalAlertBaseMsg.currentLocation.altitude = -493;
-    panicMsg.criticalAlertBaseMsg.currentLocation.accuracy = 999;
+    init_base_message(panicMsg.baseMessage.commandType, 7, time(NULL), 317, (HaloMessage *) &panicMsg);
+    panicMsg.currentLocation.latitude = -750;
+    panicMsg.currentLocation.longitude = 132;
+    panicMsg.currentLocation.elevation = -493;
+    panicMsg.currentLocation.accuracy = 999;
 
     //Do a generic send with panic msg
+    halo_msg_send((HaloMessage *) &panicMsg);
+}
+
+void sendFallMsgPkt(void)
+{
+    CriticalAlertMsg fallMsg = CRITICAL_ALERT_MSG_INIT(FALL);
+
+    init_base_message(fallMsg.baseMessage.commandType, 7, time(NULL), 317, (HaloMessage *) &fallMsg);
+    fallMsg.currentLocation.latitude = -800;
+    fallMsg.currentLocation.longitude = 460;
+    fallMsg.currentLocation.elevation = -770;
+    fallMsg.currentLocation.accuracy = 23;
+
+    //Do a generic send with panic msg
+    halo_msg_send((HaloMessage *) &fallMsg);
+}
+
+void sendBurst(void)
+{
+    CriticalAlertMsg panicMsg = CRITICAL_ALERT_MSG_INIT(PANIC);
+
+    init_base_message(panicMsg.baseMessage.commandType, 7, time(NULL), 317, (HaloMessage *) &panicMsg);
+    panicMsg.currentLocation.latitude = 590;
+    panicMsg.currentLocation.longitude = 823;
+    panicMsg.currentLocation.elevation = -215;
+    panicMsg.currentLocation.accuracy = 217;
+
+    //Do a generic send with panic msg
+    halo_msg_send((HaloMessage *) &panicMsg);
+    halo_msg_send((HaloMessage *) &panicMsg);
     halo_msg_send((HaloMessage *) &panicMsg);
 }
 

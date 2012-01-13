@@ -3,21 +3,21 @@
 
 #include "types.h"
 
-typedef struct _Location
+typedef struct
 {
     uint32 latitude;
     uint32 longitude;
-    uint32 altitude;
+    uint32 elevation;
     uint16 accuracy;
-    uint8  reserved[2];
+    uint16 deltaElevation;
 } Location;
 
 #define LOCATION_INIT(a,b,c,d) { \
- .latitude = a, \
+ .latitude  = a, \
  .longitude = b, \
- .altitude = c, \
- .accuracy = d, \
- .reserved = {0}, \
+ .elevation = c, \
+ .accuracy  = d, \
+ .deltaElevation = 0, \
 }
 
 #endif //LOCATION_H

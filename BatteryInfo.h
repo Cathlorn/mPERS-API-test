@@ -13,7 +13,7 @@ enum BattStatus
 
 typedef struct _BatteryInfo
 {
-    uint16 timeRemaining;     //How many secs of batt life left
+    uint16 minRemaining;     //How many secs of batt life left
     uint8  battPercentage;    //We might want this based on time remaining / time expected
     uint8  unusedBits : 2;
     uint8  status : 3;        //Status(Normal,Low Batt,Extremely Low Batt,Shutdown/Dying Gasp)
@@ -22,17 +22,19 @@ typedef struct _BatteryInfo
     uint8  charging : 1;      //Tells if charging
     uint8  plugged  : 1;      //Tells if plugged in
     //uint8  unusedBits : 2;
+    uint32 battVoltage;  // mV
 }
 BatteryInfo;
 
 #define BATTERY_INFO_INIT() { \
- .timeRemaining  = 0, \
+ .minRemaining  = 0, \
  .battPercentage = 0, \
  .unusedBits = 0, \
  .status = 0, \
  .chargeComplete = 0, \
  .charging = 0, \
  .plugged = 0, \
+ .battVoltage = 0, \
 }
 
 

@@ -11,26 +11,20 @@
 
 typedef struct
 {
+    uint8  version;
     uint8  status;
-    uint8  mgmt;
     uint16 seqNum;
     uint16 ackSeqNum;
-    uint8  sessionNum;
-    uint8  ackSessionNum;
     uint16 payloadLength;
-    uint8  reserved2[2];
 }
 MyHaloUdpHeader;
 
 #define MY_HALO_UDP_HEADER_INIT() { \
+ .version       = 1, \
  .status        = 0, \
- .mgmt          = 0, \
  .seqNum        = 0, \
  .ackSeqNum     = 0, \
- .sessionNum    = 0, \
- .ackSessionNum = 0, \
  .payloadLength = 0, \
- .reserved2     = {0}, \
 }
 
 #endif //MY_HALO_UDP_H

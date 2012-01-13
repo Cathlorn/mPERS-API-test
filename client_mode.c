@@ -6,9 +6,8 @@
 
 #include "types.h"
 #include "Location.h"
-#include "DynamicVitals.h"
-#include "CriticalAlert.h"
-#include "PanicMsg.h"
+#include "DynamicVitalsMsg.h"
+#include "CriticalAlertMsg.h"
 #include "HaloMsgHelperFunctions.h"
 #include "HaloMessageTypes.h"
 #include "UdpLib/halo_udp_comm.h"
@@ -27,16 +26,16 @@ void client_myhalo_udp_msg_rcvd(void *data)
 
     if (msg->commandType == ALL_DATA_DYNAMIC)
     {
-        DynamicVitals dynamicVitals;
+        DynamicVitalsMsg dynamicVitalsMsg;
 
         //Read the structure correctly
-        unpack_DynamicVitals(msg, &dynamicVitals);
+        unpack_DynamicVitalsMsg(msg, &dynamicVitalsMsg);
 
         if (clientDebug)
         {
             printf("Dynamic Vitals msg received!\n");
-            printf("Step upload Frequency: %d\n", dynamicVitals.stepData.updateFrequency);
-            printf("Activity sample Frequency: %d\n", dynamicVitals.activityData.sampleFrequency);
+            printf("Step upload Frequency: %d\n", dynamicVitalsMsg.stepData.updateFrequency);
+            printf("Activity sample Frequency: %d\n", dynamicVitalsMsg.activityData.sampleFrequency);
             printf("SrcIp: 0x%x\n", rcvEventData->socketAddress.address);
             printf("SrcPort: %d\n", rcvEventData->socketAddress.port);
         }
@@ -45,13 +44,12 @@ void client_myhalo_udp_msg_rcvd(void *data)
     {
         if (clientDebug)
         {
-            CriticalAlert *criticalAlertMsg = (CriticalAlert *) msg;
+            CriticalAlertMsg *criticalAlertMsg = (CriticalAlertMsg *) msg;
             printf("Critical Alert msg Received!\n");
             printf("Critical Alert type: %d\n", criticalAlertMsg->criticalAlertType);
             printf("Location Size: %d\n", sizeof(Location));
             printf("HaloMessage Size: %d\n", sizeof(HaloMessage));
-            printf("CriticalAlert Size: %d\n", sizeof(CriticalAlert));
-            printf("PanicMsg Size: %d\n", sizeof(PanicMsg));
+            printf("CriticalAlert Size: %d\n", sizeof(CriticalAlertMsg));
         }
     }
 }
