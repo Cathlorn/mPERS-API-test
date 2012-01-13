@@ -4,6 +4,8 @@
 //Function Prototypes
 void sendDynamicVitalsPkt(void);
 void sendPanicMsgPkt(void);
+void sendFallMsgPkt(void);
+void sendBurst(void);
 
 void start_new_halo_udp_session(void);
 void show_halo_udp_sessions(void);

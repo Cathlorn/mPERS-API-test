@@ -3,8 +3,10 @@
 
 const TestItem packetTests[] =
 {
+    {"Send Msg Burst", sendBurst},
     {"Send Dynamic Vitals Msg", sendDynamicVitalsPkt},
     {"Send Panic Msg", sendPanicMsgPkt},
+    {"Send Fall Msg", sendFallMsgPkt},
     {"HaloUDP Restart Sequence Numbers", start_new_halo_udp_session},
     {"HaloUDP Loopback Enable", halo_udp_loopback_enable},
     {"HaloUDP Loopback Disable", halo_udp_loopback_disable},
