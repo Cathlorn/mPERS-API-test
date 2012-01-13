@@ -24,16 +24,14 @@ void pack_DynamicVitalsMsg(const DynamicVitalsMsg *msg, void *dstData)
     dataPtr += sizeof(SignalStrength);
 
     stepInfoPtr = (StepInfo *) dataPtr;
-    stepInfoPtr->sampleFrequency = msg->stepData.sampleFrequency;
-    stepInfoPtr->updateFrequency = msg->stepData.updateFrequency;
+    stepInfoPtr->sampleRate = msg->stepData.sampleRate;
     stepInfoPtr->numberOfEntries = msg->stepData.numberOfEntries;
     memcpy(&stepInfoPtr->steps[0], &msg->stepData.steps[0], sizeof(uint16)*msg->stepData.numberOfEntries);
 
     dataPtr = (uint8 *) &stepInfoPtr->steps[0];
     dataPtr += (sizeof(uint16)*stepInfoPtr->numberOfEntries);
     activityInfoPtr = (ActivityInfo *) dataPtr;
-    activityInfoPtr->sampleFrequency = msg->activityData.sampleFrequency;
-    activityInfoPtr->updateFrequency = msg->activityData.updateFrequency;
+    activityInfoPtr->sampleRate = msg->activityData.sampleRate;
     activityInfoPtr->numberOfEntries = msg->activityData.numberOfEntries;
     memcpy(&activityInfoPtr->activities[0], &msg->activityData.activities[0], sizeof(uint16)*msg->activityData.numberOfEntries);
 }
@@ -51,16 +49,14 @@ void unpack_DynamicVitalsMsg(const void *srcData, DynamicVitalsMsg *msg)
     memcpy(&msg->signalStrength, &srcMsg->signalStrength, sizeof(SignalStrength));
 
     stepInfoPtr = &srcMsg->stepData;
-    msg->stepData.sampleFrequency = stepInfoPtr->sampleFrequency;
-    msg->stepData.updateFrequency = stepInfoPtr->updateFrequency;
+    msg->stepData.sampleRate = stepInfoPtr->sampleRate;
     msg->stepData.numberOfEntries = stepInfoPtr->numberOfEntries;
     memcpy(&msg->stepData.steps[0], &stepInfoPtr->steps[0], sizeof(uint16)*stepInfoPtr->numberOfEntries);
 
     dataPtr = (uint8 *) &stepInfoPtr->steps[0];
     dataPtr += (sizeof(uint16)*stepInfoPtr->numberOfEntries);
     activityInfoPtr = (ActivityInfo *) dataPtr;
-    msg->activityData.sampleFrequency = activityInfoPtr->sampleFrequency;
-    msg->activityData.updateFrequency = activityInfoPtr->updateFrequency;
+    msg->activityData.sampleRate = activityInfoPtr->sampleRate;
     msg->activityData.numberOfEntries = activityInfoPtr->numberOfEntries;
     memcpy(&msg->activityData.activities[0], &activityInfoPtr->activities[0], sizeof(uint16)*activityInfoPtr->numberOfEntries);
 }
