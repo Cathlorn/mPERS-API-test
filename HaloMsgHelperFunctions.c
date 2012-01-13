@@ -33,6 +33,7 @@ int getMsgLength(const HaloMessage *msg)
         len  = sizeof(HaloMessage);
         len += sizeof(BatteryInfo);
         len += sizeof(Location);
+        len += sizeof(SignalStrength);
         len += (4 + (2*dynamicVitalsMsg.stepData.numberOfEntries));
         len += (4 + (2*dynamicVitalsMsg.activityData.numberOfEntries));
     }

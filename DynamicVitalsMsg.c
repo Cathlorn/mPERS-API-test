@@ -20,6 +20,9 @@ void pack_DynamicVitalsMsg(const DynamicVitalsMsg *msg, void *dstData)
     memcpy(dataPtr, &msg->currentLocation, sizeof(Location));
     dataPtr += sizeof(Location);
 
+    memcpy(dataPtr, &msg->signalStrength, sizeof(SignalStrength));
+    dataPtr += sizeof(SignalStrength);
+
     stepInfoPtr = (StepInfo *) dataPtr;
     stepInfoPtr->sampleFrequency = msg->stepData.sampleFrequency;
     stepInfoPtr->updateFrequency = msg->stepData.updateFrequency;
@@ -45,6 +48,7 @@ void unpack_DynamicVitalsMsg(const void *srcData, DynamicVitalsMsg *msg)
     memcpy(&msg->baseMessage, &srcMsg->baseMessage, sizeof(HaloMessage));
     memcpy(&msg->battInfo, &srcMsg->battInfo, sizeof(BatteryInfo));
     memcpy(&msg->currentLocation, &srcMsg->currentLocation, sizeof(Location));
+    memcpy(&msg->signalStrength, &srcMsg->signalStrength, sizeof(SignalStrength));
 
     stepInfoPtr = &srcMsg->stepData;
     msg->stepData.sampleFrequency = stepInfoPtr->sampleFrequency;
