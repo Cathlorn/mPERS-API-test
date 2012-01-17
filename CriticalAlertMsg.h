@@ -23,8 +23,9 @@ typedef struct
     uint32   nadTimestamp;      //4 bytes (replaces gw timestamp;nad=Network Access Device)
     uint8    criticalAlertType; //1 byte
     uint8    retryNumber;       //1 byte (Up to 6 tries per upload attempt)
+    uint8    reserved[2];       //2 bytes
 }
-CriticalAlertMsg;  //Total: 44 bytes
+CriticalAlertMsg;  //Total: 48 bytes
 
 #define CRITICAL_ALERT_MSG_INIT(a) { \
                                 .baseMessage = HALO_MESSAGE_INIT(CRITICAL_ALERT, 0, 0, 0), \
@@ -34,6 +35,7 @@ CriticalAlertMsg;  //Total: 44 bytes
                                 .nadTimestamp = 0, \
                                 .criticalAlertType = a, \
                                 .retryNumber = 0, \
+                                .reserved = {0}, \
                           }
 
 //Helper Functions
