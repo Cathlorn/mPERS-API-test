@@ -250,6 +250,30 @@ void halo_udp_out_of_seq_tx_disable(void)
     printf("Halo UDP OutOfSeqTx Enabled\n");
 }
 
+void halo_udp_spotty_comm_control(void)
+{
+    HaloUdpCommDbg dbgTestCtrls = get_halo_udp_comm_dbg();
+    int percentFail = 80;
+
+    printf("Enter the percentage of failure you want. (0 to disable): ");
+    scanf("%d", &percentFail);
+    printf("%d %% Failure selected.\n", percentFail);
+
+    if(percentFail)
+    {
+        printf("Halo UDP SpottyRx Enabled\n");
+        //dbgTestCtrls.spottyRx = 1;
+        dbgTestCtrls.spottyRx = percentFail;
+    }
+    else
+    {
+        printf("Halo UDP SpottyRx Disabled\n");
+        //dbgTestCtrls.spottyRx = 0;
+        dbgTestCtrls.spottyRx = percentFail;
+    }
+    set_halo_udp_comm_dbg(dbgTestCtrls);
+}
+
 void halo_udp_print_dbg_comm_status(void)
 {
     HaloUdpCommDbg dbgTestCtrls = get_halo_udp_comm_dbg();
@@ -285,6 +309,16 @@ void halo_udp_print_dbg_comm_status(void)
         printf("OutOfSeqTx : Enabled\n");
     else
         printf("OutOfSeqTx : Disabled\n");
+
+    /*if (dbgTestCtrls.spottyRx)
+        printf("SpottyRx   : Enabled\n");
+    else
+        printf("SpottyRx   : Disabled\n"); */
+
+    if (dbgTestCtrls.spottyRx)
+        printf("SpottyRx   : %d %% Failure (Enabled)\n", dbgTestCtrls.spottyRx);
+    else
+        printf("SpottyRx   : %d %% Failure (Disabled)\n", dbgTestCtrls.spottyRx);
 
     printf("\n");
 }

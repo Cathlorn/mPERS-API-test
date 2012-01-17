@@ -22,5 +22,6 @@ void halo_udp_duplicate_tx_enable(void);
 void halo_udp_duplicate_tx_disable(void);
 void halo_udp_out_of_seq_tx_enable(void);
 void halo_udp_out_of_seq_tx_disable(void);
+void halo_udp_spotty_comm_control(void);
 
 #endif //CLIENT_TEST_IMPL_H

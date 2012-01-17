@@ -20,6 +20,7 @@ const TestItem packetTests[] =
     {"HaloUDP DuplicateTx Disable", halo_udp_duplicate_tx_disable},
     {"HaloUDP OutOfSeqTx Enable", halo_udp_out_of_seq_tx_enable},
     {"HaloUDP OutOfSeqTx Disable", halo_udp_out_of_seq_tx_disable},
+    {"HaloUDP SpottyComm Control", halo_udp_spotty_comm_control},
     {"Report Halo UDP Comm Dbg Params", halo_udp_print_dbg_comm_status},
 };
 

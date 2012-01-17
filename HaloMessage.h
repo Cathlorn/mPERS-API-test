@@ -14,9 +14,9 @@ typedef struct _HaloMessage
 } HaloMessage;
 
 #define HALO_MESSAGE_INIT(a,b,c,d) { \
- .formatVersion = a, \
+ .formatVersion = b, \
  .reserved = 0, \
- .commandType = b, \
+ .commandType = a, \
  .deviceId = c, \
  .time = d, \
 }

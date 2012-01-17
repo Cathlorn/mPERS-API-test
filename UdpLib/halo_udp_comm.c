@@ -628,6 +628,18 @@ void udp_recv_handler(void *data)
         processPkt = 0;
     }
 
+    //This simulates spotty communications by intentionally discarding good packets.
+    if (haloUdpCommData.userData->dbgTestCtrls.spottyRx)
+    {
+        int selectedVal = (rand() % 100);
+
+        //Try to make it fail spottyRx % of the time
+        if(selectedVal < haloUdpCommData.userData->dbgTestCtrls.spottyRx)
+        {
+            processPkt = 0;
+        }
+    }
+
     if (processPkt)
     {
         int i;

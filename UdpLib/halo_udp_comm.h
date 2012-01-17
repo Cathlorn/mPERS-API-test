@@ -30,6 +30,7 @@ typedef struct
     uint8 neverAck : 1; //Make it so that acknowledgements never happen
     uint8 duplicateTx : 1;
     uint8 outOfSeqTx : 1;
+    uint8 spottyRx;
 }
 HaloUdpCommDbg;
 
@@ -40,6 +41,7 @@ HaloUdpCommDbg;
  .neverAck    = 0, \
  .duplicateTx = 0, \
  .outOfSeqTx  = 0, \
+ .spottyRx  = 0, \
 }
 
 typedef struct
