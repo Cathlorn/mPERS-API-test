@@ -7,16 +7,14 @@
 
 typedef struct _StepInfo
 {
-    uint16  sampleFrequency; //2 bytes (How many secs of batt life left)
-    uint8  updateFrequency;  //1 byte (Number of minutes per Upload)
-    uint8  numberOfEntries;  //1 byte (# of step measurements)
+    uint16  sampleRate; //2 bytes (How many secs of batt life left)
+    uint16  numberOfEntries;  //1 byte (# of step measurements)
     uint16 steps[MAX_STEP_ENTRIES];
 }
 StepInfo;
 
 #define STEP_INFO_INIT() { \
- .sampleFrequency  = 0, \
- .updateFrequency = 0, \
+ .sampleRate  = 0, \
  .numberOfEntries = 0, \
  .steps = {0}, \
 }

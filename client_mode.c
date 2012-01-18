@@ -34,8 +34,8 @@ void client_myhalo_udp_msg_rcvd(void *data)
         if (clientDebug)
         {
             printf("Dynamic Vitals msg received!\n");
-            printf("Step upload Frequency: %d\n", dynamicVitalsMsg.stepData.updateFrequency);
-            printf("Activity sample Frequency: %d\n", dynamicVitalsMsg.activityData.sampleFrequency);
+            printf("Step sample Rate: %d\n", dynamicVitalsMsg.stepData.sampleRate);
+            printf("Activity sample Rate: %d\n", dynamicVitalsMsg.activityData.sampleRate);
             printf("SrcIp: 0x%x\n", rcvEventData->socketAddress.address);
             printf("SrcPort: %d\n", rcvEventData->socketAddress.port);
         }

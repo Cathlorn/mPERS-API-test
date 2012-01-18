@@ -20,14 +20,12 @@ void sendDynamicVitalsPkt(void)
     //Set the base parameters for the message
     init_base_message(ALL_DATA_DYNAMIC, 3, time(NULL), 518, (HaloMessage *) &dynamicVitalsMsg);
 
-    dynamicVitalsMsg.stepData.sampleFrequency = 60;
-    dynamicVitalsMsg.stepData.updateFrequency = 10;
+    dynamicVitalsMsg.stepData.sampleRate = 60;
 
     dynamicVitalsMsg.stepData.numberOfEntries = (sizeof(steps) / sizeof(uint16));
     memcpy(dynamicVitalsMsg.stepData.steps, steps, sizeof(steps));
 
-    dynamicVitalsMsg.activityData.sampleFrequency = 60;
-    dynamicVitalsMsg.activityData.updateFrequency = 10;
+    dynamicVitalsMsg.activityData.sampleRate = 60;
 
     dynamicVitalsMsg.activityData.numberOfEntries = (sizeof(activities) / sizeof(uint16));
     memcpy(dynamicVitalsMsg.activityData.activities, activities, sizeof(activities));
