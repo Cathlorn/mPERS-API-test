@@ -22,6 +22,8 @@ const TestItem packetTests[] =
     {"HaloUDP OutOfSeqTx Disable", halo_udp_out_of_seq_tx_disable},
     {"HaloUDP SpottyComm Control", halo_udp_spotty_comm_control},
     {"Report Halo UDP Comm Dbg Params", halo_udp_print_dbg_comm_status},
+    {"Report Halo UDP Statistics", halo_udp_print_stats},
+    {"Reset Halo UDP Statistics", halo_udp_reset_stats},
 };
 
 TestSuite packetTesting =

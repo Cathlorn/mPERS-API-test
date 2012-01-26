@@ -322,3 +322,13 @@ void halo_udp_print_dbg_comm_status(void)
 
     printf("\n");
 }
+
+void halo_udp_print_stats(void)
+{
+    halo_msg_report_stats();
+}
+
+void halo_udp_reset_stats(void)
+{
+    halo_msg_reset_stats();
+}

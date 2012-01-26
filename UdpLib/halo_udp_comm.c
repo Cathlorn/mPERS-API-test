@@ -11,6 +11,7 @@
 #include "../HaloMsgHelperFunctions.h"
 #include "halo_udp_tx_mgmt.h"
 #include "crc16.h"
+#include "halo_udp_stats.h"
 
 #define ACK_STACK_SIZE 50
 
@@ -56,6 +57,7 @@ typedef struct
     HaloUdpUserData *userData;
     int currentSessionIndex;
     SessionData sessionData[MAX_CONCURRENT_CONNNECTIONS];
+    HaloUdpStats stats;
 }
 HaloUdpCommData;
 
@@ -65,6 +67,7 @@ HaloUdpCommData;
  .tickCount = 0, \
  .userData  = NULL, \
  .currentSessionIndex = 0, \
+ .stats = HALO_UDP_STATS_INIT(), \
 }
 
 typedef struct
@@ -464,6 +467,12 @@ void halo_msg_rexmit(void)
                             udp_sendto(commStruct, data, dataLen, currentSessionPtr->socketAddr);
 
                             incr_tx_retries(txMgmt, burstOffset);
+
+                            //Update Statistics
+                            updateTxPkts(&haloUdpCommData.stats, 1);
+                            updateTxBytes(&haloUdpCommData.stats, dataLen);
+                            updateTxDataPkts(&haloUdpCommData.stats, 1);
+                            updateTxDataBytes(&haloUdpCommData.stats, dataLen);
                         }
 
                         //NOTE: To support multi-sending, newTxSession will need to be an enum type that has initial, pending, and done as states
@@ -489,6 +498,10 @@ void halo_msg_rexmit(void)
                         udp_sendto(commStruct, data, dataLen, socketAddress);
 
                         incr_tx_retries(txMgmt, burstOffset);
+
+                        //Update Statistics
+                        updateTxPkts(&haloUdpCommData.stats, 1);
+                        updateTxBytes(&haloUdpCommData.stats, dataLen);
                     }
                 }
             }
@@ -512,6 +525,9 @@ void halo_msg_rexmit(void)
                     else
                     {
                         halo_msg_tx_dropped(tempOffset);
+
+                        //NOTE: Dropping stats could go here instead of inside halo_msg_tx_dropped
+
                         ////Redo the search each time tx_dropped is called because the queue positions have changed
                         tempOffset = (tempOffset + txPktQueueSize - 1) % txPktQueueSize; //Go back by one when dequeuing
                     }
@@ -553,6 +569,10 @@ void halo_msg_tx_sent( GenericIP socketAddress, uint16 txSeqNum)
                 if (haloUdpCommData.userData)
                     haloUdpCommData.userData->msg_tx_sent(&data[sizeof(MyHaloUdpHeader)]);
 
+                //Update Statistics
+                updateTxConfirmedPkts(&haloUdpCommData.stats, 1);
+                updateTxConfirmedBytes(&haloUdpCommData.stats, dataLen);
+
                 //Return the buffer
                 freeBuffer(data);
 
@@ -579,6 +599,10 @@ void halo_msg_tx_dropped(int offset)
     {
         //TO DO: Redo how this drops (Make it so that the SeqNumber is actually used to know which packet to drop)
         dequeue_tx_packet(txMgmt, pktSocketAddress, seqNum); //Add function to unconditionally drop
+
+        //Update Statistics
+        updateTxDroppedPkts(&haloUdpCommData.stats, 1);
+        //updateDroppedTxBytes(&haloUdpCommData.stats, dataLen);
 
         //Notify to user that msg has been dropped
         haloUdpCommData.userData->msg_tx_dropped(&data[sizeof(MyHaloUdpHeader)]);
@@ -618,6 +642,10 @@ void udp_recv_handler(void *data)
     {
         if (haloUdpCommData.userData->debug)
             printf("Runt: Negative payload calculated.\n");
+
+        //Update Statistics
+        updateRxRuntPkts(&haloUdpCommData.stats, 1);
+
         processPkt = 0;
     }
 
@@ -625,6 +653,21 @@ void udp_recv_handler(void *data)
     {
         if (haloUdpCommData.userData->debug)
             printf("CRC Error: Pkt contains incorrect CRC.\n");
+
+        //Update Statistics
+        updateRxBadCrcPkts(&haloUdpCommData.stats, 1);
+
+        processPkt = 0;
+    }
+
+    if(payloadLength < header->payloadLength)
+    {
+        if (haloUdpCommData.userData->debug)
+            printf("Payload Error: Payload is smaller than reported.\n");
+
+        //Update Statistics
+        updateRxInvalidPayloadPkts(&haloUdpCommData.stats, 1);
+
         processPkt = 0;
     }
 
@@ -645,6 +688,11 @@ void udp_recv_handler(void *data)
         int i;
         int sessionFound = 0;
         int firstAvailableSessionSlot = -1;
+
+        //Update Statistics
+        //Packets should be good if they reach here
+        updateRxGoodPkts(&haloUdpCommData.stats, 1);
+        updateRxGoodBytes(&haloUdpCommData.stats, args.length);
 
         //Checks to see if we know about this session and adds it if possible. If not possible, it drops
         for (i = 0; i < MAX_CONCURRENT_CONNNECTIONS; i++)
@@ -712,6 +760,9 @@ void udp_recv_handler(void *data)
             //Ack Received
             halo_msg_tx_sent(currentSessionPtr->socketAddr, header->ackSeqNum);
 
+            //Update Statistics
+            updateRxAcks(&haloUdpCommData.stats, 1);
+
             //Handles confirmation of a new local session
             if ((header->status & SESSION_RESTARTED) == SESSION_RESTARTED)
             {
@@ -762,63 +813,76 @@ void udp_recv_handler(void *data)
             if (haloUdpCommData.userData->dbgTestCtrls.badCrc)
                 ackPkt.crc++;
 
-                if (!haloUdpCommData.userData->dbgTestCtrls.neverAck)
+            if (!haloUdpCommData.userData->dbgTestCtrls.neverAck)
+            {
+                //Update Statistics
+                updateTxPkts(&haloUdpCommData.stats, 1);
+                updateTxBytes(&haloUdpCommData.stats, sizeof(ackPkt));
+                updateTxAcks(&haloUdpCommData.stats, 1);
+
+                if (udp_sendto(args.commStruct, (uint8 *) &ackPkt, sizeof(ackPkt), currentSessionPtr->socketAddr) > 0)
                 {
-                    if (udp_sendto(args.commStruct, (uint8 *) &ackPkt, sizeof(ackPkt), currentSessionPtr->socketAddr) > 0)
-                    {
-                        //Advance the sequence number
-                        currentSessionPtr->txSeqNum++;
-                    }
+                    //Advance the sequence number
+                    currentSessionPtr->txSeqNum++;
+                }
+            }
+
+            //Checks to see if duplicate
+            i=currentSessionPtr->ackStackSize;
+            tmpStackIndex = currentSessionPtr->ackStackIndex;
+            while (i > 0)
+            {
+                tmpStackIndex = (tmpStackIndex - 1 + ACK_STACK_SIZE) % ACK_STACK_SIZE;
+
+                if (header->seqNum == currentSessionPtr->acknowledgementStack[tmpStackIndex])
+                {
+                    duplicateFound = 1;
+
+                    //Update Statistics
+                    updateRxDuplicatePkts(&haloUdpCommData.stats, 1);
+
+                    break;
                 }
 
-                //Checks to see if duplicate
-                i=currentSessionPtr->ackStackSize;
-                tmpStackIndex = currentSessionPtr->ackStackIndex;
-                while (i > 0)
+                i--;
+            }
+
+            if (!duplicateFound) //Send ack and store seq # if not a duplicate, otherwise ignore
+            {
+                HaloUdpRcvEventData rcvEventData = HALO_UDP_RCV_EVENT_DATA_INIT();
+
+                //Store the acknowledgement in the Acknowledgement queue for future protection
+                currentSessionPtr->acknowledgementStack[currentSessionPtr->ackStackIndex] = header->seqNum;
+                currentSessionPtr->ackStackIndex = (currentSessionPtr->ackStackIndex + 1) % ACK_STACK_SIZE;
+                if (currentSessionPtr->ackStackSize < ACK_STACK_SIZE)
+                    currentSessionPtr->ackStackSize++;
+
+                if (haloUdpCommData.userData->debug)
                 {
-                    tmpStackIndex = (tmpStackIndex - 1 + ACK_STACK_SIZE) % ACK_STACK_SIZE;
+                    printf("Binary Structure printout: \n");
 
-                    if (header->seqNum == currentSessionPtr->acknowledgementStack[tmpStackIndex])
+                    for (i=0; i< args.length; i++)
                     {
-                        duplicateFound = 1;
-                        break;
+                        printf("%02x ", args.data[i]);
+                        if ((i % 8) == 7)
+                            printf("\n");
                     }
-
-                    i--;
+                    printf("\n");
                 }
 
-                if (!duplicateFound) //Send ack and store seq # if not a duplicate, otherwise ignore
-                {
-                    HaloUdpRcvEventData rcvEventData = HALO_UDP_RCV_EVENT_DATA_INIT();
+                //Notify that new data has been received
+                rcvEventData.data = payloadPtr;
+                rcvEventData.dataLength = payloadLength;
+                rcvEventData.socketAddress = args.commStruct->rcvIP;
+                haloUdpCommData.userData->msg_rx_received(&rcvEventData);
 
-                    //Store the acknowledgement in the Acknowledgement queue for future protection
-                    currentSessionPtr->acknowledgementStack[currentSessionPtr->ackStackIndex] = header->seqNum;
-                    currentSessionPtr->ackStackIndex = (currentSessionPtr->ackStackIndex + 1) % ACK_STACK_SIZE;
-                    if (currentSessionPtr->ackStackSize < ACK_STACK_SIZE)
-                        currentSessionPtr->ackStackSize++;
+                //Update Statistics
+                updateRxDataPkts(&haloUdpCommData.stats, 1);
+                updateRxDataBytes(&haloUdpCommData.stats, args.length);
 
-                    if (haloUdpCommData.userData->debug)
-                    {
-                        printf("Binary Structure printout: \n");
-
-                        for (i=0; i< args.length; i++)
-                        {
-                            printf("%02x ", args.data[i]);
-                            if ((i % 8) == 7)
-                                printf("\n");
-                        }
-                        printf("\n");
-                    }
-
-                    //Notify that new data has been received
-                    rcvEventData.data = payloadPtr;
-                    rcvEventData.dataLength = payloadLength;
-                    rcvEventData.socketAddress = args.commStruct->rcvIP;
-                    haloUdpCommData.userData->msg_rx_received(&rcvEventData);
-
-                    if (haloUdpCommData.userData->dbgTestCtrls.loopback)
-                        halo_msg_sendto((HaloMessage *) payloadPtr, args.commStruct->rcvIP);
-                }
+                if (haloUdpCommData.userData->dbgTestCtrls.loopback)
+                    halo_msg_sendto((HaloMessage *) payloadPtr, args.commStruct->rcvIP);
+            }
         }
     }
 }
@@ -913,4 +977,33 @@ void halo_msg_cleanup(void)
     commStruct = &haloUdpCommData.haloUdpCommStruct;
 
     udp_cleanup(commStruct);
+}
+
+void halo_msg_report_stats()
+{
+    HaloUdpStats *stats = &haloUdpCommData.stats;
+
+	printf("txBytes             : %u\n", getTxBytes(stats));
+	printf("txConfirmedBytes    : %u\n", getTxConfirmedBytes(stats));
+	printf("txPkts              : %u\n", getTxPkts(stats));
+	printf("txConfirmedPkts     : %u\n", getTxConfirmedPkts(stats));
+	printf("txDroppedPkts       : %u\n", getTxDroppedPkts(stats));
+	printf("txAcks              : %u\n", getTxAcks(stats));
+	printf("txDataPkts          : %u\n", getTxDataPkts(stats));
+	printf("txDataBytes         : %u\n", getTxDataBytes(stats));
+
+	printf("rxGoodBytes         : %u\n", getRxGoodBytes(stats));
+	printf("rxGoodPkts          : %u\n", getRxGoodPkts(stats));
+	printf("rxBadCrcPkts        : %u\n", getRxBadCrcPkts(stats));
+	printf("rxDuplicatePkts     : %u\n", getRxDuplicatePkts(stats));
+	printf("rxRuntPkts          : %u\n", getRxRuntPkts(stats));
+	printf("rxInvalidPayloadPkts: %u\n", getRxInvalidPayloadPkts(stats));
+	printf("rxAcks              : %u\n", getRxAcks(stats));
+	printf("rxDataPkts          : %u\n", getRxDataPkts(stats));
+	printf("rxDataBytes         : %u\n", getRxDataBytes(stats));
+}
+
+void halo_msg_reset_stats()
+{
+    resetHaloUdpStats(&haloUdpCommData.stats);
 }
