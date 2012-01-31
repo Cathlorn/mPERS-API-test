@@ -5,7 +5,7 @@
 #include "GenericIP.h"
 
 //Configuration
-#define TX_MGMT_BUFFER_SIZE 7
+#define TX_MGMT_BUFFER_SIZE 1492//7
 
 //Define TX_MGMT_BUFFER_H_DEBUG to compile test code
 //#define TX_MGMT_BUFFER_H_DEBUG //uncomment line compile/use debug code

@@ -376,7 +376,7 @@ void resetTxSessions(void)
 //Manages retransmitting a pending msg
 void halo_msg_rexmit(void)
 {
-    const int MAX_BURST_SIZE = 5;
+    const int MAX_BURST_SIZE = 1000; //5;
     static int burstOffset = 0;
     SessionData *currentSessionPtr = NULL;
     UdpCommStruct *commStruct = NULL;

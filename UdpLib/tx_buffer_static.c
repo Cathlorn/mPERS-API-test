@@ -7,7 +7,7 @@
 #include "tx_buffer_static.h"
 
 //Configuration
-#define TX_BUFFER_SIZE 10//1
+#define TX_BUFFER_SIZE 1492//10
 #define TX_BUFFER_DATA_BLOCK_SIZE 256
 
 typedef struct
