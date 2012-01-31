@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6" />
+	<Project>
+		<Option title="mPERS-api-test" />
+		<Option pch_mode="2" />
+		<Option compiler="gcc" />
+		<Build>
+			<Target title="Debug">
+				<Option output="bin/Debug/mPERS-api-test" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/Debug/" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Option parameters="-d -hec2-204-236-192-230.compute-1.amazonaws.com -p80" />
+				<Compiler>
+					<Add option="-g" />
+				</Compiler>
+				<Linker>
+					<Add option="-lpthread" />
+				</Linker>
+			</Target>
+			<Target title="Release">
+				<Option output="bin/Release/mPERS-api-test" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/Release/" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-O2" />
+				</Compiler>
+				<Linker>
+					<Add option="-s" />
+					<Add option="-lpthread" />
+				</Linker>
+			</Target>
+		</Build>
+		<Compiler>
+			<Add option="-Wall" />
+			<Add option="-I ." />
+		</Compiler>
+		<Linker>
+			<Add option="-lpthread" />
+		</Linker>
+		<Unit filename="UdpLib/GenericIP.h" />
+		<Unit filename="UdpLib/crc16.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="UdpLib/crc16.h" />
+		<Unit filename="UdpLib/halo_udp_comm.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="UdpLib/halo_udp_comm.h" />
+		<Unit filename="UdpLib/halo_udp_stats.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="UdpLib/halo_udp_stats.h" />
+		<Unit filename="UdpLib/halo_udp_tx_mgmt.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="UdpLib/halo_udp_tx_mgmt.h" />
+		<Unit filename="UdpLib/myHaloUdp.h" />
+		<Unit filename="UdpLib/tx_buffer.h" />
+		<Unit filename="UdpLib/tx_buffer_static.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="UdpLib/tx_buffer_static.h" />
+		<Unit filename="UdpLib/tx_mgmt_buffer.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="UdpLib/tx_mgmt_buffer.h" />
+		<Unit filename="UdpLib/udp_lib.h" />
+		<Unit filename="debug_app_linux/client_mode.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="debug_app_linux/client_mode.h" />
+		<Unit filename="debug_app_linux/client_test_impl.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="debug_app_linux/client_test_impl.h" />
+		<Unit filename="debug_app_linux/client_tests.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="debug_app_linux/client_tests.h" />
+		<Unit filename="debug_app_linux/main.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="debug_app_linux/server_mode.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="debug_app_linux/server_mode.h" />
+		<Unit filename="debug_app_linux/server_tests.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="debug_app_linux/server_tests.h" />
+		<Unit filename="debug_app_linux/tests.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="debug_app_linux/tests.h" />
+		<Unit filename="debug_app_linux/udp_lib_posix_socket_impl.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="debug_app_linux/udp_lib_posix_socket_impl.h" />
+		<Unit filename="mpers/ActivityInfo.h" />
+		<Unit filename="mpers/BatteryInfo.h" />
+		<Unit filename="mpers/CriticalAlertMsg.h" />
+		<Unit filename="mpers/DynamicVitalsMsg.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="mpers/DynamicVitalsMsg.h" />
+		<Unit filename="mpers/HaloMessage.h" />
+		<Unit filename="mpers/HaloMessageTypes.h" />
+		<Unit filename="mpers/HaloMsgHelperFunctions.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="mpers/HaloMsgHelperFunctions.h" />
+		<Unit filename="mpers/Location.h" />
+		<Unit filename="mpers/ResolvedEventMsg.h" />
+		<Unit filename="mpers/SignalStrength.h" />
+		<Unit filename="mpers/StepInfo.h" />
+		<Unit filename="types.h" />
+		<Extensions>
+			<code_completion />
+			<debugger />
+		</Extensions>
+	</Project>
+</CodeBlocks_project_file>

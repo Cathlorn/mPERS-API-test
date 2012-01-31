@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6" />
+	<Project>
+		<Option title="unit_test" />
+		<Option pch_mode="2" />
+		<Option compiler="gcc" />
+		<Build>
+			<Target title="Debug">
+				<Option output="bin/Debug/unit_test" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/Debug/" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-g" />
+				</Compiler>
+			</Target>
+			<Target title="Release">
+				<Option output="bin/Release/unit_test" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/Release/" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-O2" />
+				</Compiler>
+				<Linker>
+					<Add option="-s" />
+				</Linker>
+			</Target>
+		</Build>
+		<Compiler>
+			<Add option="-Wall" />
+			<Add option="-I ." />
+		</Compiler>
+		<Linker>
+			<Add option="-lpthread" />
+		</Linker>
+		<Unit filename="UdpLib/GenericIP.h" />
+		<Unit filename="UdpLib/crc16.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="UdpLib/crc16.h" />
+		<Unit filename="UdpLib/halo_udp_comm.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="UdpLib/halo_udp_comm.h" />
+		<Unit filename="UdpLib/halo_udp_stats.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="UdpLib/halo_udp_stats.h" />
+		<Unit filename="UdpLib/halo_udp_tx_mgmt.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="UdpLib/halo_udp_tx_mgmt.h" />
+		<Unit filename="UdpLib/myHaloUdp.h" />
+		<Unit filename="UdpLib/tx_buffer.h" />
+		<Unit filename="UdpLib/tx_buffer_static.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="UdpLib/tx_buffer_static.h" />
+		<Unit filename="UdpLib/tx_mgmt_buffer.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="UdpLib/tx_mgmt_buffer.h" />
+		<Unit filename="UdpLib/udp_lib.h" />
+		<Unit filename="UdpLib/unit_test/halo_udp_tests.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="UdpLib/unit_test/halo_udp_tests.h" />
+		<Unit filename="UdpLib/unit_test/main.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="UdpLib/unit_test/test_control_interface.h" />
+		<Unit filename="UdpLib/unit_test/test_impl.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="UdpLib/unit_test/test_impl.h" />
+		<Unit filename="UdpLib/unit_test/test_impl2.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="UdpLib/unit_test/test_mode.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="UdpLib/unit_test/test_mode.h" />
+		<Unit filename="UdpLib/unit_test/test_msg_queue.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="UdpLib/unit_test/test_msg_queue.h" />
+		<Unit filename="UdpLib/unit_test/tests.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="UdpLib/unit_test/tests.h" />
+		<Unit filename="UdpLib/unit_test/udp_lib_test_impl.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="mpers/ActivityInfo.h" />
+		<Unit filename="mpers/BatteryInfo.h" />
+		<Unit filename="mpers/CriticalAlertMsg.h" />
+		<Unit filename="mpers/DynamicVitalsMsg.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="mpers/DynamicVitalsMsg.h" />
+		<Unit filename="mpers/HaloMessage.h" />
+		<Unit filename="mpers/HaloMessageTypes.h" />
+		<Unit filename="mpers/HaloMsgHelperFunctions.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="mpers/HaloMsgHelperFunctions.h" />
+		<Unit filename="mpers/Location.h" />
+		<Unit filename="mpers/ResolvedEventMsg.h" />
+		<Unit filename="mpers/SignalStrength.h" />
+		<Unit filename="mpers/StepInfo.h" />
+		<Unit filename="types.h" />
+		<Extensions>
+			<code_completion />
+			<debugger />
+		</Extensions>
+	</Project>
+</CodeBlocks_project_file>
