@@ -57,7 +57,7 @@ typedef struct
     uint16 length;
     UdpCommStruct *commStruct;
 }
-UdpRecvArgs;
+UdpEventData;
 
 //Setup the port
 void udp_init(UdpCommStruct *commStruct);

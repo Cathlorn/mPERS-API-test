@@ -174,6 +174,7 @@ int udp_sendto(UdpCommStruct *commStruct, uint8 *data, int len,
 {
     int sent = -1;
     struct sockaddr_in socketAddress;
+    UdpEventData udpEventData;
     socklen_t socketAddressLength;
     PosixUdpData *posixDataPtr = (PosixUdpData *) commStruct->udpSocketDataPtr;
 
@@ -188,6 +189,14 @@ int udp_sendto(UdpCommStruct *commStruct, uint8 *data, int len,
     sent = sendto ( posixDataPtr->sock, data, len, 0,
                     (struct sockaddr *) &socketAddress,
                     socketAddressLength );
+
+    if(sent > 0)
+    {
+        udpEventData.length = len;
+        udpEventData.data = data;
+        udpEventData.commStruct = commStruct;
+        commStruct->dataSent((void *) &udpEventData);
+    }
 
     if (commStruct->debug)
         printf("Sent %d bytes\n", sent);
@@ -275,14 +284,14 @@ void udp_tick(UdpCommStruct *commStruct)
 void udp_recv_tick(UdpCommStruct *commStruct)
 {
     unsigned char buffer[BUFFSIZE];
-    UdpRecvArgs args;
+    UdpEventData udpEventData;
 
     if (udp_recv(commStruct, buffer, sizeof(buffer)) > 0) //new data
     {
-        args.data   = commStruct->recvData;
-        args.length = commStruct->recvLength;
-        args.commStruct = commStruct;
+        udpEventData.data   = commStruct->recvData;
+        udpEventData.length = commStruct->recvLength;
+        udpEventData.commStruct = commStruct;
 
-        commStruct->dataReceived((void *) &args);
+        commStruct->dataReceived((void *) &udpEventData);
     }
 }
