@@ -17,17 +17,21 @@ typedef struct
 }
 BufferEntry;
 
+#define BUFFER_ENTRY_INIT() { \
+ .used  = 0, \
+ .data = {0}, \
+}
+
 typedef struct
 {
-    int arrayPosition;
     int numberOfAllocatedEntries;
     BufferEntry entries[TX_BUFFER_SIZE];
 }
 BufferArray;
 
 static BufferArray bufferArray = { \
-                                   .arrayPosition = 0, \
-                                   .numberOfAllocatedEntries = 0 \
+                                   .numberOfAllocatedEntries = 0, \
+                                   .entries       = { [0 ... TX_BUFFER_SIZE-1] BUFFER_ENTRY_INIT()}, \
                                  };
 
 int getBuffer(int requested_length, void **data, int *max_length)
@@ -50,16 +54,14 @@ int getBuffer(int requested_length, void **data, int *max_length)
                 *max_length = TX_BUFFER_DATA_BLOCK_SIZE;
 
                 bufferArray.entries[i].used = 1;
+                //Update position
+                bufferArray.numberOfAllocatedEntries++;
+
+                //Update result
+                result = SUCCESS;
                 break;
             }
         }
-
-        //Update position
-        bufferArray.arrayPosition = (bufferArray.arrayPosition + 1) % TX_BUFFER_SIZE; //Increment Postion
-        bufferArray.numberOfAllocatedEntries++;
-
-        //Update result
-        result = SUCCESS;
     }
 
     return result;
@@ -79,16 +81,14 @@ int freeBuffer(void *data)
             {
                 //Match found
                 bufferArray.entries[i].used = 0;
+                //Update position
+                bufferArray.numberOfAllocatedEntries--;
+
+                //Update result
+                result = SUCCESS;
                 break;
             }
         }
-
-        //Update position
-        bufferArray.arrayPosition = (bufferArray.arrayPosition - 1 + TX_BUFFER_SIZE) % TX_BUFFER_SIZE; //Increment Postion
-        bufferArray.numberOfAllocatedEntries--;
-
-        //Update result
-        result = SUCCESS;
     }
 
     return result;

@@ -30,19 +30,23 @@ int dequeueBuffer(TxMgmtBuffer *txMgmtBuffer, int offset)
     {
         int currentIndex;
         int nextPosition;
+        int shiftsRemaining = 0;
 
         //Shift data to remove entry
-        currentIndex = (txMgmtBuffer->arrayHead + offset) % TX_MGMT_BUFFER_SIZE; //Increment Postion;
-        nextPosition = (currentIndex + 1) % TX_MGMT_BUFFER_SIZE;
-        while (nextPosition != txMgmtBuffer->arrayTail) //Copy until you reach the end (Tail points to the next available slot so don't copy that
+        currentIndex = (txMgmtBuffer->arrayHead + offset) % TX_MGMT_BUFFER_SIZE;
+        nextPosition = (currentIndex - 1 + TX_MGMT_BUFFER_SIZE) % TX_MGMT_BUFFER_SIZE;
+        shiftsRemaining = offset;
+        while (shiftsRemaining)
         {
+            //Copy data backwards from the empty slot at 'offset'
             txMgmtBuffer->entries[currentIndex] = txMgmtBuffer->entries[nextPosition];
             currentIndex = nextPosition;
-            nextPosition = (currentIndex + 1) % TX_MGMT_BUFFER_SIZE;
+            nextPosition = (currentIndex - 1 + TX_MGMT_BUFFER_SIZE) % TX_MGMT_BUFFER_SIZE;
+            shiftsRemaining--;
         }
 
         //Update position
-        txMgmtBuffer->arrayTail = (txMgmtBuffer->arrayTail - 1 + TX_MGMT_BUFFER_SIZE) % TX_MGMT_BUFFER_SIZE; //Increment Postion
+        txMgmtBuffer->arrayHead = (txMgmtBuffer->arrayHead + 1 + TX_MGMT_BUFFER_SIZE) % TX_MGMT_BUFFER_SIZE; //Increment Postion
         txMgmtBuffer->numberOfAllocatedEntries--;
 
         //Update result
@@ -124,12 +128,10 @@ void bufferTest()
 
     entry1.data = data1;
     entry1.length = sizeof(data1);
-    entry1.sessionIndex = 0;
     entry1.seqNum = 0;
 
     entry2.data = data2;
     entry2.length = sizeof(data2);
-    entry2.sessionIndex = 1;
     entry2.seqNum = 1;
 
     if (isBufferEmpty(&txMgmtBuffer))
@@ -165,12 +167,11 @@ void bufferTest()
             printf("data        : %s\n", tmpEntry.data);
             printf("length      : %d\n", tmpEntry.length);
             printf("seqNum      : %d\n", tmpEntry.seqNum);
-            printf("sessionIndex: %d\n", tmpEntry.sessionIndex);
             printf("\n");
         }
         else
         {
-            printf("peekBuffer failed at index %s!\n", i);
+            printf("peekBuffer failed at index %d!\n", i);
             printf("\n");
         }
     }
@@ -197,12 +198,11 @@ void bufferTest()
             printf("data        : %s\n", tmpEntry.data);
             printf("length      : %d\n", tmpEntry.length);
             printf("seqNum      : %d\n", tmpEntry.seqNum);
-            printf("sessionIndex: %d\n", tmpEntry.sessionIndex);
             printf("\n");
         }
         else
         {
-            printf("peekBuffer failed at index %s!\n", i);
+            printf("peekBuffer failed at index %d!\n", i);
             printf("\n");
         }
     }
