@@ -19,7 +19,7 @@
 	<File name="dvt_app_linux/client_tests.c" open="0" top="0" tabpos="0">
 		<Cursor position="183" topLine="0" />
 	</File>
-	<File name="dvt_app_linux/client_tests.h" open="1" top="0" tabpos="1">
+	<File name="dvt_app_linux/client_tests.h" open="0" top="0" tabpos="1">
 		<Cursor position="57" topLine="0" />
 	</File>
 	<File name="dvt_app_linux/main.c" open="0" top="0" tabpos="0">
@@ -34,7 +34,7 @@
 	<File name="dvt_app_linux/server_tests.c" open="0" top="0" tabpos="0">
 		<Cursor position="341" topLine="0" />
 	</File>
-	<File name="dvt_app_linux/server_tests.h" open="1" top="1" tabpos="2">
+	<File name="dvt_app_linux/server_tests.h" open="0" top="0" tabpos="2">
 		<Cursor position="62" topLine="0" />
 	</File>
 	<File name="dvt_app_linux/str_utils.c" open="0" top="0" tabpos="0">
@@ -42,9 +42,6 @@
 	</File>
 	<File name="dvt_app_linux/str_utils.h" open="0" top="0" tabpos="0">
 		<Cursor position="92" topLine="0" />
-	</File>
-	<File name="dvt_app_linux/udp_lib_posix_socket_impl.c" open="0" top="0" tabpos="0">
-		<Cursor position="8085" topLine="260" />
 	</File>
 	<File name="mpers/ActivityInfo.h" open="0" top="0" tabpos="0">
 		<Cursor position="325" topLine="0" />

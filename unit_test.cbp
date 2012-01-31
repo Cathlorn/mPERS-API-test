@@ -35,6 +35,10 @@
 		<Linker>
 			<Add option="-lpthread" />
 		</Linker>
+		<Unit filename="Test/tests.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="Test/tests.h" />
 		<Unit filename="UdpLib/GenericIP.h" />
 		<Unit filename="UdpLib/crc16.c">
 			<Option compilerVar="CC" />
@@ -86,11 +90,7 @@
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="UdpLib/unit_test/test_msg_queue.h" />
-		<Unit filename="UdpLib/unit_test/tests.c">
-			<Option compilerVar="CC" />
-		</Unit>
-		<Unit filename="UdpLib/unit_test/tests.h" />
-		<Unit filename="UdpLib/unit_test/udp_lib_test_impl.c">
+		<Unit filename="UdpLibImpl/udp_lib_test_impl.c">
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="mpers/ActivityInfo.h" />

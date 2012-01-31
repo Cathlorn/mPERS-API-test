@@ -1,0 +1,68 @@
+# depslib dependency file v1.0
+1328037690 source:/home/death/source/mPERS-api-test11/Test/tests.c
+	<stdio.h>
+	"tests.h"
+
+1328037706 /home/death/source/mPERS-api-test11/Test/tests.h
+
+1328046771 source:/home/death/source/mPERS-api-test11/UdpLibImpl/udp_lib_posix_socket_impl.c
+	<stdio.h>
+	<stdlib.h>
+	<string.h>
+	<unistd.h>
+	<fcntl.h>
+	<arpa/inet.h>
+	<netinet/in.h>
+	<netdb.h>
+	<sys/wait.h>
+	<assert.h>
+	"../types.h"
+	"UdpLib/udp_lib.h"
+	"udp_lib_posix_socket_impl.h"
+
+1325104897 /home/death/source/mPERS-api-test11/types.h
+
+1325172013 /home/death/source/mPERS-api-test11/UdpLibImpl/udp_lib_posix_socket_impl.h
+	<sys/socket.h>
+	<netinet/in.h>
+
+1328041063 source:/home/death/source/mPERS-api-test11/UdpLibImpl/unit_test/main.c
+	"test_mode.h"
+
+1328041113 /home/death/source/mPERS-api-test11/UdpLibImpl/unit_test/test_mode.h
+
+1328045869 source:/home/death/source/mPERS-api-test11/UdpLibImpl/unit_test/test_impl.c
+	<stdio.h>
+	<unistd.h>
+	<string.h>
+	<assert.h>
+	"types.h"
+	"UdpLib/udp_lib.h"
+	"test_control_interface.h"
+	"udp_tests.h"
+
+1328044670 /home/death/source/mPERS-api-test11/UdpLibImpl/unit_test/test_control_interface.h
+	"UdpLib/udp_lib.h"
+	"Test/tests.h"
+
+1328041290 /home/death/source/mPERS-api-test11/UdpLibImpl/unit_test/udp_tests.h
+	"Test/tests.h"
+
+1328046217 source:/home/death/source/mPERS-api-test11/UdpLibImpl/unit_test/test_mode.c
+	<stdio.h>
+	<string.h>
+	<stdlib.h>
+	<unistd.h>
+	<pthread.h>
+	"types.h"
+	"UdpLib/udp_lib.h"
+	"udp_tests.h"
+	"Test/tests.h"
+	"test_control_interface.h"
+
+1328041401 source:/home/death/source/mPERS-api-test11/UdpLibImpl/unit_test/udp_tests.c
+	"udp_tests.h"
+	"test_impl.h"
+
+1328041290 /home/death/source/mPERS-api-test11/UdpLibImpl/unit_test/test_impl.h
+

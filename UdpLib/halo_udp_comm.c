@@ -623,8 +623,8 @@ void udp_recv_handler(void *data)
 {
     SessionData *currentSessionPtr = NULL;
     HaloUdpTxMgmt *txMgmt = NULL;
-    UdpRecvArgs args = *(UdpRecvArgs *) data;
-    MyHaloUdpHeader *header = (MyHaloUdpHeader *) args.data;
+    UdpEventData udpEventData = *(UdpEventData *) data;
+    MyHaloUdpHeader *header = (MyHaloUdpHeader *) udpEventData.data;
     uint8 *payloadPtr;
     int payloadLength;
     uint16 pktCrc;  //CRC Includes the header and the payload to make sure everything's correct.
@@ -632,13 +632,13 @@ void udp_recv_handler(void *data)
     uint8 processPkt = 1;
     int pktSessionIndex = -1;
 
-    payloadLength = args.length;
+    payloadLength = udpEventData.length;
     payloadLength -= sizeof(MyHaloUdpHeader); //Remove header size
     payloadLength -= sizeof(pktCrc);          //Remove CRC size
-    payloadPtr = &args.data[sizeof(MyHaloUdpHeader)];
+    payloadPtr = &udpEventData.data[sizeof(MyHaloUdpHeader)];
 
     //Calculate CRC
-    calculatedCrc = hdlcFcs16(hdlc_init_fcs16, args.data, args.length - 2);
+    calculatedCrc = hdlcFcs16(hdlc_init_fcs16, udpEventData.data, udpEventData.length - 2);
 
     if (payloadLength < 0)
     {
@@ -698,7 +698,7 @@ void udp_recv_handler(void *data)
         //Update Statistics
         //Packets should be good if they reach here
         updateRxGoodPkts(&haloUdpCommData.stats, 1);
-        updateRxGoodBytes(&haloUdpCommData.stats, args.length);
+        updateRxGoodBytes(&haloUdpCommData.stats, udpEventData.length);
 
         //Checks to see if we know about this session and adds it if possible. If not possible, it drops
         for (i = 0; i < MAX_CONCURRENT_CONNNECTIONS; i++)
@@ -706,8 +706,8 @@ void udp_recv_handler(void *data)
             if (haloUdpCommData.sessionData[i].used)
             {
                 //Checks that IPs match (received data and IP/port tied to session entry)
-                if ((args.commStruct->rcvIP.address == haloUdpCommData.sessionData[i].socketAddr.address) &&
-                        (args.commStruct->rcvIP.port == haloUdpCommData.sessionData[i].socketAddr.port) )
+                if ((udpEventData.commStruct->rcvIP.address == haloUdpCommData.sessionData[i].socketAddr.address) &&
+                        (udpEventData.commStruct->rcvIP.port == haloUdpCommData.sessionData[i].socketAddr.port) )
                 {
                     haloUdpCommData.sessionData[i].sessionTickCount = 0; //Reset the inactivity count
                     pktSessionIndex = i;
@@ -730,7 +730,7 @@ void udp_recv_handler(void *data)
         else if (firstAvailableSessionSlot >= 0)
         {
             //Save IP
-            haloUdpCommData.sessionData[firstAvailableSessionSlot].socketAddr = args.commStruct->rcvIP;
+            haloUdpCommData.sessionData[firstAvailableSessionSlot].socketAddr = udpEventData.commStruct->rcvIP;
 
             //Set up the acknowledgement queue
             haloUdpCommData.sessionData[firstAvailableSessionSlot].ackStackSize  = 0;
@@ -826,7 +826,7 @@ void udp_recv_handler(void *data)
                 updateTxBytes(&haloUdpCommData.stats, sizeof(ackPkt));
                 updateTxAcks(&haloUdpCommData.stats, 1);
 
-                if (udp_sendto(args.commStruct, (uint8 *) &ackPkt, sizeof(ackPkt), currentSessionPtr->socketAddr) > 0)
+                if (udp_sendto(udpEventData.commStruct, (uint8 *) &ackPkt, sizeof(ackPkt), currentSessionPtr->socketAddr) > 0)
                 {
                     //Advance the sequence number
                     currentSessionPtr->txSeqNum++;
@@ -867,9 +867,9 @@ void udp_recv_handler(void *data)
                 {
                     printf("Binary Structure printout: \n");
 
-                    for (i=0; i< args.length; i++)
+                    for (i=0; i< udpEventData.length; i++)
                     {
-                        printf("%02x ", args.data[i]);
+                        printf("%02x ", udpEventData.data[i]);
                         if ((i % 8) == 7)
                             printf("\n");
                     }
@@ -879,15 +879,15 @@ void udp_recv_handler(void *data)
                 //Notify that new data has been received
                 rcvEventData.data = payloadPtr;
                 rcvEventData.dataLength = payloadLength;
-                rcvEventData.socketAddress = args.commStruct->rcvIP;
+                rcvEventData.socketAddress = udpEventData.commStruct->rcvIP;
                 haloUdpCommData.userData->msg_rx_received(&rcvEventData);
 
                 //Update Statistics
                 updateRxDataPkts(&haloUdpCommData.stats, 1);
-                updateRxDataBytes(&haloUdpCommData.stats, args.length);
+                updateRxDataBytes(&haloUdpCommData.stats, udpEventData.length);
 
                 if (haloUdpCommData.userData->dbgTestCtrls.loopback)
-                    halo_msg_sendto((HaloMessage *) payloadPtr, args.commStruct->rcvIP);
+                    halo_msg_sendto((HaloMessage *) payloadPtr, udpEventData.commStruct->rcvIP);
             }
         }
     }

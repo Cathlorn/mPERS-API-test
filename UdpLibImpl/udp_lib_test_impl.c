@@ -91,14 +91,14 @@ void udp_tick(UdpCommStruct *commStruct)
 void udp_recv_tick(UdpCommStruct *commStruct)
 {
     unsigned char buffer[BUFFSIZE];
-    UdpRecvArgs args;
+    UdpEventData udpEventData;
 
     if (udp_recv(commStruct, buffer, sizeof(buffer)) > 0) //new data
     {
-        args.data   = commStruct->recvData;
-        args.length = commStruct->recvLength;
-        args.commStruct = commStruct;
+        udpEventData.data   = commStruct->recvData;
+        udpEventData.length = commStruct->recvLength;
+        udpEventData.commStruct = commStruct;
 
-        commStruct->dataReceived((void *) &args);
+        commStruct->dataReceived((void *) &udpEventData);
     }
 }
