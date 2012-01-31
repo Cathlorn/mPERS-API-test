@@ -21,7 +21,7 @@ static HaloUdpUserData haloUdpUserData;
 void client_myhalo_udp_msg_rcvd(void *data)
 {
     //HaloMessage *msg = (HaloMessage *) data;
-    HaloUdpRcvEventData *rcvEventData = (HaloUdpRcvEventData *) data;
+    HaloUdpEventData *rcvEventData = (HaloUdpEventData *) data;
     HaloMessage *msg = (HaloMessage *) rcvEventData->data;
 
     if (msg->commandType == ALL_DATA_DYNAMIC)
@@ -56,7 +56,7 @@ void client_myhalo_udp_msg_rcvd(void *data)
 
 void client_myhalo_udp_msg_sent(void *data)
 {
-    //HaloUdpRcvEventData *rcvEventData = (HaloUdpRcvEventData *) data;
+    //HaloUdpEventData *rcvEventData = (HaloUdpEventData *) data;
     //HaloMessage *msg = (HaloMessage *) rcvEventData->data;
     HaloMessage *msg = (HaloMessage *) data;
 

@@ -27,4 +27,16 @@ MyHaloUdpHeader;
  .payloadLength = 0, \
 }
 
+typedef struct
+{
+    MyHaloUdpHeader header;
+    uint16 crc;
+}
+HaloUdpAckPkt;
+
+#define HALO_UDP_ACK_PKT_INIT() { \
+ .header       = MY_HALO_UDP_HEADER_INIT(), \
+ .crc          = 0, \
+}
+
 #endif //MY_HALO_UDP_H

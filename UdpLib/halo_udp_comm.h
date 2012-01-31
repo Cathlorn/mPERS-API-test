@@ -6,6 +6,7 @@
 #include "../HaloMessage.h"
 #include "../types.h"
 #include "GenericIP.h"
+#include "halo_udp_stats.h"
 
 //Configuration
 
@@ -74,9 +75,9 @@ typedef struct
     uint8 *data;
     GenericIP socketAddress;
 }
-HaloUdpRcvEventData;
+HaloUdpEventData;
 
-#define HALO_UDP_RCV_EVENT_DATA_INIT() { \
+#define HALO_UDP_EVENT_DATA_INIT() { \
  .dataLength = 0, \
  .data = NULL, \
  .socketAddress = GENERIC_IP_INIT(), \
@@ -96,6 +97,7 @@ void halo_msg_cleanup(void);
 
 void halo_msg_report_stats();
 void halo_msg_reset_stats();
+HaloUdpStats get_halo_msg_stats();
 
 //Halo UDP Protocol Debug Testing Control functions
 HaloUdpCommDbg get_halo_udp_comm_dbg(void);

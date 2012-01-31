@@ -70,18 +70,6 @@ HaloUdpCommData;
  .stats = HALO_UDP_STATS_INIT(), \
 }
 
-typedef struct
-{
-    MyHaloUdpHeader header;
-    uint16 crc;
-}
-HaloUdpAckPkt;
-
-#define HALO_UDP_ACK_PKT_INIT() { \
- .header       = MY_HALO_UDP_HEADER_INIT(), \
- .crc          = 0, \
-}
-
 //Stores the data used to handle the halo UDP communications stack
 static HaloUdpCommData haloUdpCommData = HALO_UDP_COMM_DATA_INIT();
 
@@ -336,6 +324,10 @@ int halo_msg_send_to_index(const HaloMessage *msg, int sessionIndex)
             assert(0);
         }
     }
+    else
+    {
+        printf("WARNING: Attempting to send to session index %d, where there is no entry!\n", sessionIndex);
+    }
 
     return result;
 }
@@ -562,12 +554,18 @@ void halo_msg_tx_sent( GenericIP socketAddress, uint16 txSeqNum)
             if ((socketAddress.address == pktSocketAddress.address) &&
                     (socketAddress.port == pktSocketAddress.port)&&(txSeqNum == seqNum))
             {
+                HaloUdpEventData sentEventData = HALO_UDP_EVENT_DATA_INIT();
+
                 //TO DO: Redo how this drops
                 dequeue_tx_packet(txMgmt, pktSocketAddress, txSeqNum); //Add function to unconditionally drop
 
+                sentEventData.dataLength = dataLen - sizeof(MyHaloUdpHeader) - 2; //2 -> MyHaloUdpTail
+                sentEventData.data = &data[sizeof(MyHaloUdpHeader)];
+                sentEventData.socketAddress = pktSocketAddress;
+
                 //Notify to user that msg has been sent
                 if (haloUdpCommData.userData)
-                    haloUdpCommData.userData->msg_tx_sent(&data[sizeof(MyHaloUdpHeader)]);
+                    haloUdpCommData.userData->msg_tx_sent(&sentEventData);
 
                 //Update Statistics
                 updateTxConfirmedPkts(&haloUdpCommData.stats, 1);
@@ -597,6 +595,8 @@ void halo_msg_tx_dropped(int offset)
 
     if (peek_tx_packet(txMgmt, offset, &data, &dataLen, &seqNum, &pktSocketAddress) == SUCCESS)
     {
+        HaloUdpEventData droppedEventData = HALO_UDP_EVENT_DATA_INIT();
+
         //TO DO: Redo how this drops (Make it so that the SeqNumber is actually used to know which packet to drop)
         dequeue_tx_packet(txMgmt, pktSocketAddress, seqNum); //Add function to unconditionally drop
 
@@ -604,8 +604,12 @@ void halo_msg_tx_dropped(int offset)
         updateTxDroppedPkts(&haloUdpCommData.stats, 1);
         //updateDroppedTxBytes(&haloUdpCommData.stats, dataLen);
 
+        droppedEventData.dataLength = dataLen - sizeof(MyHaloUdpHeader) - 2; //2 -> MyHaloUdpTail
+        droppedEventData.data = &data[sizeof(MyHaloUdpHeader)];
+        droppedEventData.socketAddress = pktSocketAddress;
+
         //Notify to user that msg has been dropped
-        haloUdpCommData.userData->msg_tx_dropped(&data[sizeof(MyHaloUdpHeader)]);
+        haloUdpCommData.userData->msg_tx_dropped(&droppedEventData);
 
         //Return the buffer
         freeBuffer(data);
@@ -633,8 +637,6 @@ void udp_recv_handler(void *data)
     payloadLength -= sizeof(pktCrc);          //Remove CRC size
     payloadPtr = &args.data[sizeof(MyHaloUdpHeader)];
 
-    pktCrc = ((uint16) (payloadPtr[payloadLength] & 0xff)) | ((uint16) payloadPtr[payloadLength + 1] << 8);
-
     //Calculate CRC
     calculatedCrc = hdlcFcs16(hdlc_init_fcs16, args.data, args.length - 2);
 
@@ -649,15 +651,19 @@ void udp_recv_handler(void *data)
         processPkt = 0;
     }
 
-    if (pktCrc != calculatedCrc)
+    if(processPkt)
     {
-        if (haloUdpCommData.userData->debug)
-            printf("CRC Error: Pkt contains incorrect CRC.\n");
+        pktCrc = ((uint16) (payloadPtr[payloadLength] & 0xff)) | ((uint16) payloadPtr[payloadLength + 1] << 8);
+        if (pktCrc != calculatedCrc)
+        {
+            if (haloUdpCommData.userData->debug)
+                printf("CRC Error: Pkt contains incorrect CRC.\n");
 
-        //Update Statistics
-        updateRxBadCrcPkts(&haloUdpCommData.stats, 1);
+            //Update Statistics
+            updateRxBadCrcPkts(&haloUdpCommData.stats, 1);
 
-        processPkt = 0;
+            processPkt = 0;
+        }
     }
 
     if(payloadLength < header->payloadLength)
@@ -849,7 +855,7 @@ void udp_recv_handler(void *data)
 
             if (!duplicateFound) //Send ack and store seq # if not a duplicate, otherwise ignore
             {
-                HaloUdpRcvEventData rcvEventData = HALO_UDP_RCV_EVENT_DATA_INIT();
+                HaloUdpEventData rcvEventData = HALO_UDP_EVENT_DATA_INIT();
 
                 //Store the acknowledgement in the Acknowledgement queue for future protection
                 currentSessionPtr->acknowledgementStack[currentSessionPtr->ackStackIndex] = header->seqNum;
@@ -1006,4 +1012,9 @@ void halo_msg_report_stats()
 void halo_msg_reset_stats()
 {
     resetHaloUdpStats(&haloUdpCommData.stats);
+}
+
+HaloUdpStats get_halo_msg_stats()
+{
+    return haloUdpCommData.stats;
 }
