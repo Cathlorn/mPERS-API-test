@@ -38,9 +38,13 @@ void getTestItemChoice(TestSuite *testSuite)
 void showTestItems(TestSuite *testSuite)
 {
     int i;
+
+    printf("Test#     Test Description\n");
+    printf("----------------------------------------\n");
+
     for(i = 0; i < testSuite->testItemCount; i++)
     {
-        printf("%4d. %s\n", i+1, testSuite->testItems[i].testDescription);
+        printf("%4d.     %s\n", i+1, testSuite->testItems[i].testDescription);
     }
 }
 

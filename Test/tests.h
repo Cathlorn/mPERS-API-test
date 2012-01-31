@@ -1,7 +1,19 @@
 #ifndef TESTS_H
 #define TESTS_H
 
-typedef void ( *TestFunction ) ( void );
+typedef struct
+{
+    int testNumber;
+    char *testArgs;
+}
+TestInfo;
+
+#define TEST_INFO_INIT(a,b) { \
+ .testNumber  = a, \
+ .testArgs = b, \
+}
+
+typedef int ( *TestFunction ) ( void *args );
 
 typedef struct {
     const char *testDescription;
@@ -18,5 +30,9 @@ TestSuite;
 
 void printTestItemMenu(TestSuite *testSuite);
 void getTestItemChoice(TestSuite *testSuite);
+
+void showTestItems(TestSuite *testSuite);
+int runTestItem(TestSuite *testSuite, unsigned int testIndex, void *args);
+int runAllTestItems(TestSuite *testSuite);
 
 #endif //TESTS_H

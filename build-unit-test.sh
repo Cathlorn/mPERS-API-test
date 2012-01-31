@@ -18,8 +18,8 @@ UdpLib/unit_test/halo_udp_tests.c \
 UdpLib/unit_test/test_impl.c \
 UdpLib/unit_test/test_impl2.c \
 UdpLib/unit_test/test_mode.c \
-UdpLib/unit_test/udp_lib_test_impl.c \
+UdpLibImpl/udp_lib_test_impl.c \
 UdpLib/unit_test/main.c \
-UdpLib/unit_test/tests.c \
+Test/tests.c \
 UdpLib/unit_test/test_msg_queue.c
 

@@ -1,0 +1,272 @@
+# depslib dependency file v1.0
+1278708826 source:/home/death/source/mPERS-api-test11/UdpLib/crc16.c
+	<stdio.h>
+	<assert.h>
+	"crc16.h"
+
+1327951479 /home/death/source/mPERS-api-test11/UdpLib/crc16.h
+	"types.h"
+
+1327963855 source:/home/death/source/mPERS-api-test11/UdpLib/halo_udp_comm.c
+	<unistd.h>
+	<string.h>
+	<stdio.h>
+	<stdlib.h>
+	<assert.h>
+	"myHaloUdp.h"
+	"halo_udp_comm.h"
+	"udp_lib.h"
+	"tx_buffer.h"
+	"mpers/HaloMsgHelperFunctions.h"
+	"halo_udp_tx_mgmt.h"
+	"crc16.h"
+	"halo_udp_stats.h"
+
+1327951649 /home/death/source/mPERS-api-test11/UdpLib/myHaloUdp.h
+	"types.h"
+
+1327951560 /home/death/source/mPERS-api-test11/UdpLib/halo_udp_comm.h
+	"mpers/HaloMessage.h"
+	"types.h"
+	"GenericIP.h"
+	"halo_udp_stats.h"
+
+1327951474 /home/death/source/mPERS-api-test11/UdpLib/GenericIP.h
+	"types.h"
+
+1327951627 /home/death/source/mPERS-api-test11/UdpLib/halo_udp_stats.h
+	"types.h"
+
+1327951718 /home/death/source/mPERS-api-test11/UdpLib/udp_lib.h
+	"types.h"
+	"GenericIP.h"
+
+1319475521 /home/death/source/mPERS-api-test11/UdpLib/tx_buffer.h
+	"tx_buffer_static.h"
+
+1319555544 /home/death/source/mPERS-api-test11/UdpLib/tx_buffer_static.h
+
+1327951640 /home/death/source/mPERS-api-test11/UdpLib/halo_udp_tx_mgmt.h
+	"types.h"
+	"GenericIP.h"
+	"tx_mgmt_buffer.h"
+
+1327951711 /home/death/source/mPERS-api-test11/UdpLib/tx_mgmt_buffer.h
+	"types.h"
+	"GenericIP.h"
+
+1327596204 source:/home/death/source/mPERS-api-test11/UdpLib/halo_udp_stats.c
+	"halo_udp_stats.h"
+
+1327951634 source:/home/death/source/mPERS-api-test11/UdpLib/halo_udp_tx_mgmt.c
+	"tx_buffer.h"
+	"halo_udp_tx_mgmt.h"
+	"types.h"
+
+1327951675 source:/home/death/source/mPERS-api-test11/UdpLib/tx_buffer_static.c
+	"types.h"
+	"tx_buffer_static.h"
+
+1327951703 source:/home/death/source/mPERS-api-test11/UdpLib/tx_mgmt_buffer.c
+	<stdio.h>
+	"tx_mgmt_buffer.h"
+
+1326486703 source:/home/death/source/mPERS-api-test11/mpers/DynamicVitalsMsg.c
+	<string.h>
+	"DynamicVitalsMsg.h"
+
+1327675365 /home/death/source/mPERS-api-test11/mpers/DynamicVitalsMsg.h
+	"types.h"
+	"ActivityInfo.h"
+	"BatteryInfo.h"
+	"HaloMessage.h"
+	"Location.h"
+	"SignalStrength.h"
+	"StepInfo.h"
+
+1327675345 /home/death/source/mPERS-api-test11/mpers/ActivityInfo.h
+	"types.h"
+
+1327675352 /home/death/source/mPERS-api-test11/mpers/BatteryInfo.h
+	"types.h"
+
+1327675376 /home/death/source/mPERS-api-test11/mpers/HaloMessage.h
+	"types.h"
+
+1327675376 /home/death/source/mPERS-api-test11/mpers/Location.h
+	"types.h"
+
+1327675405 /home/death/source/mPERS-api-test11/mpers/SignalStrength.h
+	"types.h"
+
+1327675405 /home/death/source/mPERS-api-test11/mpers/StepInfo.h
+	"types.h"
+
+1326485459 source:/home/death/source/mPERS-api-test11/mpers/HaloMsgHelperFunctions.c
+	<string.h>
+	<stdio.h>
+	<assert.h>
+	"HaloMsgHelperFunctions.h"
+	"HaloMessageTypes.h"
+	"BatteryInfo.h"
+	"Location.h"
+	"DynamicVitalsMsg.h"
+	"CriticalAlertMsg.h"
+	"ResolvedEventMsg.h"
+
+1320862338 /home/death/source/mPERS-api-test11/mpers/HaloMsgHelperFunctions.h
+	"HaloMessage.h"
+
+1326399273 /home/death/source/mPERS-api-test11/mpers/HaloMessageTypes.h
+
+1327675359 /home/death/source/mPERS-api-test11/mpers/CriticalAlertMsg.h
+	"types.h"
+	"HaloMessage.h"
+	"Location.h"
+	"SignalStrength.h"
+
+1327675383 /home/death/source/mPERS-api-test11/mpers/ResolvedEventMsg.h
+	"types.h"
+	"HaloMessage.h"
+	"Location.h"
+	"SignalStrength.h"
+
+1328030284 source:/home/death/source/mPERS-api-test11/dvt_app_linux/client_mode.c
+	<stdio.h>
+	<unistd.h>
+	<string.h>
+	<stdlib.h>
+	<pthread.h>
+	<assert.h>
+	"types.h"
+	"mpers/Location.h"
+	"mpers/DynamicVitalsMsg.h"
+	"mpers/CriticalAlertMsg.h"
+	"mpers/HaloMsgHelperFunctions.h"
+	"mpers/HaloMessageTypes.h"
+	"UdpLib/halo_udp_comm.h"
+	"UdpLib/myHaloUdp.h"
+	"client_tests.h"
+
+1319821271 /home/death/source/mPERS-api-test11/dvt_app_linux/client_tests.h
+	"tests.h"
+
+1328029833 /home/death/source/mPERS-api-test11/dvt_app_linux/tests.h
+
+1328031318 source:/home/death/source/mPERS-api-test11/dvt_app_linux/client_test_impl.c
+	<time.h>
+	<string.h>
+	<stdio.h>
+	<unistd.h>
+	<stdlib.h>
+	"mpers/HaloMessageTypes.h"
+	"mpers/HaloMsgHelperFunctions.h"
+	"mpers/DynamicVitalsMsg.h"
+	"mpers/CriticalAlertMsg.h"
+	"UdpLib/halo_udp_comm.h"
+	"UdpLib/halo_udp_stats.h"
+	"client_test_impl.h"
+
+1327960638 /home/death/source/mPERS-api-test11/dvt_app_linux/client_test_impl.h
+
+1327960508 source:/home/death/source/mPERS-api-test11/dvt_app_linux/client_tests.c
+	"client_tests.h"
+	"client_test_impl.h"
+
+1327964073 source:/home/death/source/mPERS-api-test11/dvt_app_linux/server_mode.c
+	<stdio.h>
+	<unistd.h>
+	<stdlib.h>
+	<pthread.h>
+	"types.h"
+	"mpers/Location.h"
+	"mpers/DynamicVitalsMsg.h"
+	"mpers/CriticalAlertMsg.h"
+	"UdpLib/myHaloUdp.h"
+	"mpers/HaloMsgHelperFunctions.h"
+	"mpers/HaloMessageTypes.h"
+	"server_tests.h"
+	"UdpLib/halo_udp_comm.h"
+
+1319837249 /home/death/source/mPERS-api-test11/dvt_app_linux/server_tests.h
+	"tests.h"
+
+1327960508 source:/home/death/source/mPERS-api-test11/dvt_app_linux/server_tests.c
+	"server_tests.h"
+	"client_test_impl.h"
+
+1328027787 source:/home/death/source/mPERS-api-test11/dvt_app_linux/tests.c
+	<stdio.h>
+	"tests.h"
+
+1327954485 source:/home/death/source/mPERS-api-test11/dvt_app_linux/udp_lib_posix_socket_impl.c
+	<stdio.h>
+	<stdlib.h>
+	<string.h>
+	<unistd.h>
+	<fcntl.h>
+	<arpa/inet.h>
+	<netinet/in.h>
+	<netdb.h>
+	<sys/wait.h>
+	<assert.h>
+	"../types.h"
+	"UdpLib/udp_lib.h"
+	"udp_lib_posix_socket_impl.h"
+
+1325104897 /home/death/source/mPERS-api-test11/types.h
+
+1325172013 /home/death/source/mPERS-api-test11/dvt_app_linux/udp_lib_posix_socket_impl.h
+	<sys/socket.h>
+	<netinet/in.h>
+
+1328030059 source:/home/death/source/mPERS-api-test11/dvt_app_linux/main.c
+	<stdio.h>
+	<stdlib.h>
+	<string.h>
+	<ctype.h>
+	<getopt.h>
+	<assert.h>
+	"client_mode.h"
+	"server_mode.h"
+	"client_tests.h"
+	"server_tests.h"
+	"types.h"
+	"str_utils.h"
+
+1328029927 /home/death/source/mPERS-api-test11/dvt_app_linux/client_mode.h
+
+1327961451 /home/death/source/mPERS-api-test11/dvt_app_linux/server_mode.h
+
+1328029391 /home/death/source/mPERS-api-test11/dvt_app_linux/str_utils.h
+
+1328029492 source:/home/death/source/mPERS-api-test11/dvt_app_linux/str_utils.c
+	<assert.h>
+	<string.h>
+	"str_utils.h"
+
+1328037690 source:/home/death/source/mPERS-api-test11/Test/tests.c
+	<stdio.h>
+	"tests.h"
+
+1328037706 /home/death/source/mPERS-api-test11/Test/tests.h
+
+1327954485 source:/home/death/source/mPERS-api-test11/UdpLibImpl/udp_lib_posix_socket_impl.c
+	<stdio.h>
+	<stdlib.h>
+	<string.h>
+	<unistd.h>
+	<fcntl.h>
+	<arpa/inet.h>
+	<netinet/in.h>
+	<netdb.h>
+	<sys/wait.h>
+	<assert.h>
+	"../types.h"
+	"UdpLib/udp_lib.h"
+	"udp_lib_posix_socket_impl.h"
+
+1325172013 /home/death/source/mPERS-api-test11/UdpLibImpl/udp_lib_posix_socket_impl.h
+	<sys/socket.h>
+	<netinet/in.h>
+

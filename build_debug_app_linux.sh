@@ -12,8 +12,8 @@ debug_app_linux/client_tests.c \
 debug_app_linux/main.c \
 debug_app_linux/server_mode.c \
 debug_app_linux/server_tests.c \
-debug_app_linux/tests.c \
-debug_app_linux/udp_lib_posix_socket_impl.c \
+Test/tests.c \
+UdpLibImpl/udp_lib_posix_socket_impl.c \
 mpers/DynamicVitalsMsg.c \
 mpers/HaloMsgHelperFunctions.c \
 UdpLib/halo_udp_tx_mgmt.c \

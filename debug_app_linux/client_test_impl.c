@@ -10,7 +10,7 @@
 
 #include "client_test_impl.h"
 
-void sendDynamicVitalsPkt(void)
+int sendDynamicVitalsPkt(void *args)
 {
     DynamicVitalsMsg dynamicVitalsMsg = DYNAMIC_VITALS_MSG_INIT();
     uint16 steps[] = {1,2,3,4,5,6,7,8,9,10};
@@ -46,9 +46,11 @@ void sendDynamicVitalsPkt(void)
 
     //Do a generic send with vitals msg
     halo_msg_send((HaloMessage *) dynamicVitalsBuffer);
+
+    return 1;
 }
 
-void sendPanicMsgPkt(void)
+int sendPanicMsgPkt(void *args)
 {
     CriticalAlertMsg panicMsg = CRITICAL_ALERT_MSG_INIT(PANIC);
 
@@ -60,9 +62,11 @@ void sendPanicMsgPkt(void)
 
     //Do a generic send with panic msg
     halo_msg_send((HaloMessage *) &panicMsg);
+
+    return 1;
 }
 
-void sendFallMsgPkt(void)
+int sendFallMsgPkt(void *args)
 {
     CriticalAlertMsg fallMsg = CRITICAL_ALERT_MSG_INIT(FALL);
 
@@ -74,9 +78,11 @@ void sendFallMsgPkt(void)
 
     //Do a generic send with panic msg
     halo_msg_send((HaloMessage *) &fallMsg);
+
+    return 1;
 }
 
-void sendBurst(void)
+int sendBurst(void *args)
 {
     CriticalAlertMsg panicMsg = CRITICAL_ALERT_MSG_INIT(PANIC);
 
@@ -90,15 +96,19 @@ void sendBurst(void)
     halo_msg_send((HaloMessage *) &panicMsg);
     halo_msg_send((HaloMessage *) &panicMsg);
     halo_msg_send((HaloMessage *) &panicMsg);
+
+    return 1;
 }
 
-void start_new_halo_udp_session(void)
+int start_new_halo_udp_session(void *args)
 {
     halo_msg_new_session(0);
     printf("Halo UDP New Session Created!\n");
+
+    return 1;
 }
 
-void show_halo_udp_sessions(void)
+int show_halo_udp_sessions(void *args)
 {
     int sessionCount;
     int i;
@@ -116,9 +126,11 @@ void show_halo_udp_sessions(void)
             halo_msg_report_session(i);
         }
     }
+
+    return 1;
 }
 
-void halo_udp_loopback_enable(void)
+int halo_udp_loopback_enable(void *args)
 {
     HaloUdpCommDbg dbgTestCtrls = get_halo_udp_comm_dbg();
 
@@ -127,9 +139,11 @@ void halo_udp_loopback_enable(void)
     set_halo_udp_comm_dbg(dbgTestCtrls);
 
     printf("Halo UDP Loopback Enabled\n");
+
+    return 1;
 }
 
-void halo_udp_loopback_disable(void)
+int halo_udp_loopback_disable(void *args)
 {
     HaloUdpCommDbg dbgTestCtrls = get_halo_udp_comm_dbg();
 
@@ -138,9 +152,11 @@ void halo_udp_loopback_disable(void)
     set_halo_udp_comm_dbg(dbgTestCtrls);
 
     printf("Halo UDP Loopback Enabled\n");
+
+    return 1;
 }
 
-void halo_udp_bad_crc_enable(void)
+int halo_udp_bad_crc_enable(void *args)
 {
     HaloUdpCommDbg dbgTestCtrls = get_halo_udp_comm_dbg();
 
@@ -149,9 +165,11 @@ void halo_udp_bad_crc_enable(void)
     set_halo_udp_comm_dbg(dbgTestCtrls);
 
     printf("Halo UDP BadCrc Enabled\n");
+
+    return 1;
 }
 
-void halo_udp_bad_crc_disable(void)
+int halo_udp_bad_crc_disable(void *args)
 {
     HaloUdpCommDbg dbgTestCtrls = get_halo_udp_comm_dbg();
 
@@ -160,9 +178,11 @@ void halo_udp_bad_crc_disable(void)
     set_halo_udp_comm_dbg(dbgTestCtrls);
 
     printf("Halo UDP BadCrc Enabled\n");
+
+    return 1;
 }
 
-void halo_udp_never_ack_enable(void)
+int halo_udp_never_ack_enable(void *args)
 {
     HaloUdpCommDbg dbgTestCtrls = get_halo_udp_comm_dbg();
 
@@ -171,9 +191,11 @@ void halo_udp_never_ack_enable(void)
     set_halo_udp_comm_dbg(dbgTestCtrls);
 
     printf("Halo UDP NeverAck Enabled\n");
+
+    return 1;
 }
 
-void halo_udp_never_ack_disable(void)
+int halo_udp_never_ack_disable(void *args)
 {
     HaloUdpCommDbg dbgTestCtrls = get_halo_udp_comm_dbg();
 
@@ -182,9 +204,11 @@ void halo_udp_never_ack_disable(void)
     set_halo_udp_comm_dbg(dbgTestCtrls);
 
     printf("Halo UDP NeverAck Enabled\n");
+
+    return 1;
 }
 
-void halo_udp_never_tx_drop_enable(void)
+int halo_udp_never_tx_drop_enable(void *args)
 {
     HaloUdpCommDbg dbgTestCtrls = get_halo_udp_comm_dbg();
 
@@ -193,9 +217,11 @@ void halo_udp_never_tx_drop_enable(void)
     set_halo_udp_comm_dbg(dbgTestCtrls);
 
     printf("Halo UDP NeverTxDrop Enabled\n");
+
+    return 1;
 }
 
-void halo_udp_never_tx_drop_disable(void)
+int halo_udp_never_tx_drop_disable(void *args)
 {
     HaloUdpCommDbg dbgTestCtrls = get_halo_udp_comm_dbg();
 
@@ -204,9 +230,11 @@ void halo_udp_never_tx_drop_disable(void)
     set_halo_udp_comm_dbg(dbgTestCtrls);
 
     printf("Halo UDP NeverTxDrop Enabled\n");
+
+    return 1;
 }
 
-void halo_udp_duplicate_tx_enable(void)
+int halo_udp_duplicate_tx_enable(void *args)
 {
     HaloUdpCommDbg dbgTestCtrls = get_halo_udp_comm_dbg();
 
@@ -215,9 +243,11 @@ void halo_udp_duplicate_tx_enable(void)
     set_halo_udp_comm_dbg(dbgTestCtrls);
 
     printf("Halo UDP DuplicateTx Enabled\n");
+
+    return 1;
 }
 
-void halo_udp_duplicate_tx_disable(void)
+int halo_udp_duplicate_tx_disable(void *args)
 {
     HaloUdpCommDbg dbgTestCtrls = get_halo_udp_comm_dbg();
 
@@ -226,9 +256,11 @@ void halo_udp_duplicate_tx_disable(void)
     set_halo_udp_comm_dbg(dbgTestCtrls);
 
     printf("Halo UDP DuplicateTx Enabled\n");
+
+    return 1;
 }
 
-void halo_udp_out_of_seq_tx_enable(void)
+int halo_udp_out_of_seq_tx_enable(void *args)
 {
     HaloUdpCommDbg dbgTestCtrls = get_halo_udp_comm_dbg();
 
@@ -237,9 +269,11 @@ void halo_udp_out_of_seq_tx_enable(void)
     set_halo_udp_comm_dbg(dbgTestCtrls);
 
     printf("Halo UDP OutOfSeqTx Enabled\n");
+
+    return 1;
 }
 
-void halo_udp_out_of_seq_tx_disable(void)
+int halo_udp_out_of_seq_tx_disable(void *args)
 {
     HaloUdpCommDbg dbgTestCtrls = get_halo_udp_comm_dbg();
 
@@ -248,9 +282,11 @@ void halo_udp_out_of_seq_tx_disable(void)
     set_halo_udp_comm_dbg(dbgTestCtrls);
 
     printf("Halo UDP OutOfSeqTx Enabled\n");
+
+    return 1;
 }
 
-void halo_udp_spotty_comm_control(void)
+int halo_udp_spotty_comm_control(void *args)
 {
     HaloUdpCommDbg dbgTestCtrls = get_halo_udp_comm_dbg();
     int percentFail = 80;
@@ -272,9 +308,11 @@ void halo_udp_spotty_comm_control(void)
         dbgTestCtrls.spottyRx = percentFail;
     }
     set_halo_udp_comm_dbg(dbgTestCtrls);
+
+    return 1;
 }
 
-void halo_udp_print_dbg_comm_status(void)
+int halo_udp_print_dbg_comm_status(void *args)
 {
     HaloUdpCommDbg dbgTestCtrls = get_halo_udp_comm_dbg();
 
@@ -321,14 +359,20 @@ void halo_udp_print_dbg_comm_status(void)
         printf("SpottyRx   : %d %% Failure (Disabled)\n", dbgTestCtrls.spottyRx);
 
     printf("\n");
+
+    return 1;
 }
 
-void halo_udp_print_stats(void)
+int halo_udp_print_stats(void *args)
 {
     halo_msg_report_stats();
+
+    return 1;
 }
 
-void halo_udp_reset_stats(void)
+int halo_udp_reset_stats(void *args)
 {
     halo_msg_reset_stats();
+
+    return 1;
 }

@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_layout_file>
+	<ActiveTarget name="Debug" />
+	<File name="UdpLib/halo_udp_comm.c" open="0" top="0" tabpos="0">
+		<Cursor position="35764" topLine="984" />
+	</File>
+	<File name="dvt_app_linux/client_mode.c" open="0" top="0" tabpos="0">
+		<Cursor position="2944" topLine="100" />
+	</File>
+	<File name="dvt_app_linux/client_mode.h" open="0" top="0" tabpos="0">
+		<Cursor position="95" topLine="0" />
+	</File>
+	<File name="dvt_app_linux/client_test_impl.c" open="0" top="0" tabpos="0">
+		<Cursor position="2417" topLine="97" />
+	</File>
+	<File name="dvt_app_linux/client_test_impl.h" open="0" top="0" tabpos="0">
+		<Cursor position="253" topLine="0" />
+	</File>
+	<File name="dvt_app_linux/client_tests.c" open="0" top="0" tabpos="0">
+		<Cursor position="183" topLine="0" />
+	</File>
+	<File name="dvt_app_linux/client_tests.h" open="1" top="0" tabpos="1">
+		<Cursor position="57" topLine="0" />
+	</File>
+	<File name="dvt_app_linux/main.c" open="0" top="0" tabpos="0">
+		<Cursor position="4375" topLine="111" />
+	</File>
+	<File name="dvt_app_linux/server_mode.c" open="0" top="0" tabpos="0">
+		<Cursor position="2817" topLine="93" />
+	</File>
+	<File name="dvt_app_linux/server_mode.h" open="0" top="0" tabpos="0">
+		<Cursor position="78" topLine="0" />
+	</File>
+	<File name="dvt_app_linux/server_tests.c" open="0" top="0" tabpos="0">
+		<Cursor position="341" topLine="0" />
+	</File>
+	<File name="dvt_app_linux/server_tests.h" open="1" top="1" tabpos="2">
+		<Cursor position="62" topLine="0" />
+	</File>
+	<File name="dvt_app_linux/str_utils.c" open="0" top="0" tabpos="0">
+		<Cursor position="39" topLine="0" />
+	</File>
+	<File name="dvt_app_linux/str_utils.h" open="0" top="0" tabpos="0">
+		<Cursor position="92" topLine="0" />
+	</File>
+	<File name="dvt_app_linux/udp_lib_posix_socket_impl.c" open="0" top="0" tabpos="0">
+		<Cursor position="8085" topLine="260" />
+	</File>
+	<File name="mpers/ActivityInfo.h" open="0" top="0" tabpos="0">
+		<Cursor position="325" topLine="0" />
+	</File>
+</CodeBlocks_layout_file>
