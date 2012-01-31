@@ -3,7 +3,7 @@
 #ifndef HALO_UDP_STATS_H
 #define HALO_UDP_STATS_H
 
-#include "../types.h"
+#include "types.h"
 
 typedef struct
 {

@@ -33,6 +33,19 @@ int processArguments ( int argc, char **argv, ProgramInitParams *initParams )
     assert(initParams);
     opterr = 0;
 
+    if(argc == 1)
+    {
+        //Prints the argument descriptions
+        printf("%-40s     %40s\n","-h [hostname]",
+               "Network host name to connect to in client mode. Name to bind to in server mode.");
+        printf("%-40s     %40s\n","-p [port]",
+               "Network port to connect to in client mode. Port to bind to in server mode.");
+        printf("%-40s     %40s\n","-s",
+               "Server Mode (without argument, default is client mode.");
+        printf("%-40s     %40s\n","-d",
+               "Debug. Give extra details about what is going on.");
+    }
+
     while ( ( c = getopt ( argc, argv, "sdh::p::" ) ) != -1 )
     {
         switch ( c )

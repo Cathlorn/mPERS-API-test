@@ -2,10 +2,10 @@
 #include <string.h>
 #include <stdio.h>
 
-#include "HaloMessageTypes.h"
-#include "HaloMsgHelperFunctions.h"
-#include "DynamicVitalsMsg.h"
-#include "CriticalAlertMsg.h"
+#include "mpers/HaloMessageTypes.h"
+#include "mpers/HaloMsgHelperFunctions.h"
+#include "mpers/DynamicVitalsMsg.h"
+#include "mpers/CriticalAlertMsg.h"
 #include "UdpLib/halo_udp_comm.h"
 
 #include "client_test_impl.h"

@@ -1,7 +1,7 @@
 #ifndef GENERIC_IP_H
 #define GENERIC_IP_H
 
-#include "../types.h"
+#include "types.h"
 
 //Making IPv4-specific for now, can add support for IPv6 later
 typedef struct

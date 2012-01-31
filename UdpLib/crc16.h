@@ -1,7 +1,7 @@
 #ifndef CRC16_H
 #define CRC16_H
 
-#include "../types.h"
+#include "types.h"
 
 extern const uint16 hdlc_init_fcs16;
 extern const uint16 hdlc_good_fcs16;

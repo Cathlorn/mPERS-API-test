@@ -8,7 +8,7 @@
 #include "halo_udp_comm.h"
 #include "udp_lib.h"
 #include "tx_buffer.h"
-#include "../HaloMsgHelperFunctions.h"
+#include "mpers/HaloMsgHelperFunctions.h"
 #include "halo_udp_tx_mgmt.h"
 #include "crc16.h"
 #include "halo_udp_stats.h"

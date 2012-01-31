@@ -3,8 +3,8 @@
 #ifndef HALO_UDP_COMM_H
 #define HALO_UDP_COMM_H
 
-#include "../HaloMessage.h"
-#include "../types.h"
+#include "mpers/HaloMessage.h"
+#include "types.h"
 #include "GenericIP.h"
 #include "halo_udp_stats.h"
 
