@@ -12,6 +12,7 @@ debug_app_linux/client_tests.c \
 debug_app_linux/main.c \
 debug_app_linux/server_mode.c \
 debug_app_linux/server_tests.c \
+General/genericStaticArrayBuffer.c \
 Test/tests.c \
 UdpLibImpl/udp_lib_posix_socket_impl.c \
 mpers/DynamicVitalsMsg.c \

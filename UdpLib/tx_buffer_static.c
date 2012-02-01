@@ -4,92 +4,46 @@
 //Pool implements a circular queue from a static array
 
 #include "types.h"
+#include "General/genericStaticArrayBuffer.h"
 #include "tx_buffer_static.h"
 
 //Configuration
 #define TX_BUFFER_SIZE 1492//10
 #define TX_BUFFER_DATA_BLOCK_SIZE 256
 
-typedef struct
+static uint8 dataBuffer[TX_BUFFER_SIZE][TX_BUFFER_DATA_BLOCK_SIZE];
+static BufferTableEntry bufferTableEntries[TX_BUFFER_SIZE];
+static BufferTable bufferTable = BUFFER_TABLE_INIT(bufferTableEntries,sizeof(bufferTableEntries));
+static int tableInitialized = 0;
+
+void populateDataPtrsToTable()
 {
-    uint8 used;
-    uint8 data[TX_BUFFER_DATA_BLOCK_SIZE];
-}
-BufferEntry;
+    int i;
 
-#define BUFFER_ENTRY_INIT() { \
- .used  = 0, \
- .data = {0}, \
+    for(i = 0; i < bufferTable.maxNumberOfEntries; i++)
+    {
+        assignData(&bufferTable, i, &dataBuffer[i][0], TX_BUFFER_DATA_BLOCK_SIZE);
+    }
 }
 
-typedef struct
+void initTable()
 {
-    int numberOfAllocatedEntries;
-    BufferEntry entries[TX_BUFFER_SIZE];
+    initBufferTable(&bufferTable, bufferTableEntries, sizeof(bufferTableEntries)/sizeof(BufferTableEntry));
+    populateDataPtrsToTable();
 }
-BufferArray;
-
-static BufferArray bufferArray = { \
-                                   .numberOfAllocatedEntries = 0, \
-                                   .entries       = { [0 ... TX_BUFFER_SIZE-1] BUFFER_ENTRY_INIT()}, \
-                                 };
 
 int getBuffer(int requested_length, void **data, int *max_length)
 {
-    int result = FAIL;
-    int i;
-
-    //Space on the Buffer
-    if ((bufferArray.numberOfAllocatedEntries < TX_BUFFER_SIZE)&&(requested_length <= TX_BUFFER_DATA_BLOCK_SIZE))
+    if(!tableInitialized)
     {
-        //Find first free spot
-        for (i=0; i< TX_BUFFER_SIZE; i++)
-        {
-            if (!bufferArray.entries[i].used)
-            {
-                //Match found
-                //Point to the correct buffer
-                *data = bufferArray.entries[i].data;
-                //Report the defined maximum length
-                *max_length = TX_BUFFER_DATA_BLOCK_SIZE;
-
-                bufferArray.entries[i].used = 1;
-                //Update position
-                bufferArray.numberOfAllocatedEntries++;
-
-                //Update result
-                result = SUCCESS;
-                break;
-            }
-        }
+        initTable();
+        tableInitialized = 1;
     }
 
-    return result;
+    return getBufferEntry(&bufferTable, requested_length, data, max_length);
 }
 
 int freeBuffer(void *data)
 {
-    int result = FAIL;
-    int i;
-
-    if (bufferArray.numberOfAllocatedEntries > 0)
-    {
-        //Find pointer that has been freed
-        for (i=0; i< TX_BUFFER_SIZE; i++)
-        {
-            if (data == bufferArray.entries[i].data)
-            {
-                //Match found
-                bufferArray.entries[i].used = 0;
-                //Update position
-                bufferArray.numberOfAllocatedEntries--;
-
-                //Update result
-                result = SUCCESS;
-                break;
-            }
-        }
-    }
-
-    return result;
+    return freeBufferEntry(&bufferTable, data);
 }

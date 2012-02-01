@@ -40,6 +40,10 @@
 		<Linker>
 			<Add option="-lpthread" />
 		</Linker>
+		<Unit filename="General/genericStaticArrayBuffer.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="General/genericStaticArrayBuffer.h" />
 		<Unit filename="Test/tests.c">
 			<Option compilerVar="CC" />
 		</Unit>

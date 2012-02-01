@@ -35,10 +35,15 @@
 		<Linker>
 			<Add option="-lpthread" />
 		</Linker>
+		<Unit filename="General/genericStaticArrayBuffer.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="General/genericStaticArrayBuffer.h" />
 		<Unit filename="Test/tests.c">
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="Test/tests.h" />
+		<Unit filename="UdpLib/udp_lib.h" />
 		<Unit filename="UdpLibImpl/udp_lib_posix_socket_impl.c">
 			<Option compilerVar="CC" />
 		</Unit>

@@ -23,8 +23,25 @@
 #define USE_POSIX_DYNAMIC_ALLOC 0
 
 #if !USE_POSIX_DYNAMIC_ALLOC
+#include "General/genericStaticArrayBuffer.h"
+
 static PosixUdpData posixDataArray[POSIX_DATA_ARRAY_SIZE];
-static int posixDataArrayCount = 0;
+//static int posixDataArrayCount = 0;
+
+static int posixTableInitialized = 0;
+static BufferTable posixDataBufferTable;
+static BufferTableEntry posixDataBufferEntries[POSIX_DATA_ARRAY_SIZE];
+
+void initPosixDataTable()
+{
+    int i;
+    initBufferTable(&posixDataBufferTable, posixDataBufferEntries, sizeof(posixDataBufferEntries)/sizeof(BufferTableEntry));
+
+    for(i = 0; i < posixDataBufferTable.maxNumberOfEntries; i++)
+    {
+        assignData(&posixDataBufferTable, i, &posixDataArray[i], sizeof(PosixUdpData));
+    }
+}
 #endif
 
 //Made really dumb. You can only allocate, can't free
@@ -35,9 +52,15 @@ PosixUdpData * getPosixDataPointer(void)
 #if USE_POSIX_DYNAMIC_ALLOC
     posixUdpDataPtr = (PosixUdpData *) malloc(sizeof(PosixUdpData));
 #else
-    assert(posixDataArrayCount < POSIX_DATA_ARRAY_SIZE);
-    posixUdpDataPtr = &posixDataArray[posixDataArrayCount];
-    posixDataArrayCount++;
+    int max_length = 0;
+
+    if(!posixTableInitialized)
+    {
+        initPosixDataTable();
+        posixTableInitialized = 1;
+    }
+
+    assert(getBufferEntry(&posixDataBufferTable, sizeof(PosixUdpData), (void **) &posixUdpDataPtr, &max_length) == SUCCESS);
 #endif
 
     return posixUdpDataPtr;
@@ -51,6 +74,7 @@ void freePosixDataPointer(PosixUdpData * posixUdpDataPtr)
     //Do Nothing
     //TODO: Create an implementation that retreives bytes from a static pool either of PosixUDP Data structures
     //or from generic bytes.
+    assert(freeBufferEntry(&posixDataBufferTable, posixUdpDataPtr) == SUCCESS);
 #endif
 }
 

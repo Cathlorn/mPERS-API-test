@@ -8,6 +8,7 @@ fi
 
 $CC -I . -lpthread -o halo_udp_dvt mpers/DynamicVitalsMsg.c \
 mpers/HaloMsgHelperFunctions.c \
+General/genericStaticArrayBuffer.c \
 UdpLib/halo_udp_tx_mgmt.c \
 UdpLib/tx_mgmt_buffer.c \
 UdpLib/halo_udp_stats.c \
