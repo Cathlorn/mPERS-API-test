@@ -3,7 +3,8 @@
 
 const TestItem udpProtocolTests[] =
 {
-    {"UDP Tx Comm Success Test", txGoodTest},
+    {"UDP Bidirectional Comm Test", commTest},
+    {"UDP ReOpening Socket Test", reOpenTest},
 };
 
 TestSuite udpProtocolTesting =

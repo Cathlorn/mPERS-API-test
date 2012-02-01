@@ -2,6 +2,7 @@
 #define TEST_IMPL_H
 
 //Function Prototypes
-int txGoodTest(void *args);
+int commTest(void *args);
+int reOpenTest(void *args);
 
 #endif //TEST_IMPL_H

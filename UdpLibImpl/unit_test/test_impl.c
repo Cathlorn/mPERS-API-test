@@ -22,14 +22,14 @@ void reset_test_state()
     setServerTestSentCallback(NULL);
 }
 
-static uint8 clientTxDataSample[] = {0xdd,0x1e,0x00,0x17, 0x71};
-static uint8 serverTxDataSample[] = {0xfe,0x23,0xa,0xbe, 0x41,0x99,0x3};
+static uint8 clientTxDataSample[] = {0xdd,0x1e,0x00,0x17,0x71};
+static uint8 serverTxDataSample[] = {0xfe,0x23,0xa,0xbe,0x41,0x99,0x3};
 static int clientDataSent = 0;
 static int clientDataRcvd = 0;
 static int serverDataSent = 0;
 static int serverDataRcvd = 0;
 
-int txGoodTest_ClientSentCallback(void *args)
+int commTest_ClientSentCallback(void *args)
 {
     int passed = 0;
     UdpEventData *pUdpEventData = (UdpEventData *) args;
@@ -43,7 +43,7 @@ int txGoodTest_ClientSentCallback(void *args)
     return passed;
 }
 
-int txGoodTest_ClientRcvdCallback(void *args)
+int commTest_ClientRcvdCallback(void *args)
 {
     int passed = 0;
     UdpEventData *pUdpEventData = (UdpEventData *) args;
@@ -57,7 +57,7 @@ int txGoodTest_ClientRcvdCallback(void *args)
     return passed;
 }
 
-int txGoodTest_ServerSentCallback(void *args)
+int commTest_ServerSentCallback(void *args)
 {
     int passed = 0;
     UdpEventData *pUdpEventData = (UdpEventData *) args;
@@ -71,7 +71,7 @@ int txGoodTest_ServerSentCallback(void *args)
     return passed;
 }
 
-int txGoodTest_ServerRcvdCallback(void *args)
+int commTest_ServerRcvdCallback(void *args)
 {
     int passed = 0;
     UdpEventData *pUdpEventData = (UdpEventData *) args;
@@ -86,7 +86,7 @@ int txGoodTest_ServerRcvdCallback(void *args)
     return passed;
 }
 
-int txGoodTest(void *args)
+int biDirectionalCommCheck()
 {
     int passed = 0;
     int timeout = 40;
@@ -94,10 +94,10 @@ int txGoodTest(void *args)
 
     reset_test_state();
 
-    setClientTestRcvdCallback(txGoodTest_ClientRcvdCallback);
-    setClientTestSentCallback(txGoodTest_ClientSentCallback);
-    setServerTestRcvdCallback(txGoodTest_ServerRcvdCallback);
-    setServerTestSentCallback(txGoodTest_ServerSentCallback);
+    setClientTestRcvdCallback(commTest_ClientRcvdCallback);
+    setClientTestSentCallback(commTest_ClientSentCallback);
+    setServerTestRcvdCallback(commTest_ServerRcvdCallback);
+    setServerTestSentCallback(commTest_ServerSentCallback);
 
     clientDataSent = 0;
     clientDataRcvd = 0;
@@ -125,7 +125,71 @@ int txGoodTest(void *args)
         printf("Test Timed Out!\n");
     }
 
-    printf("Tx Good Test: %s\n", passed ? "PASSED" : "FAILED");
+    return passed;
+}
+
+int commTest(void *args)
+{
+    int passed = 0;
+
+    passed = biDirectionalCommCheck();
+
+    printf("Bidirectional Communication Test: %s\n", passed ? "PASSED" : "FAILED");
+
+    return passed;
+}
+
+int reOpenTest(void *args)
+{
+    int passed = 1;
+
+    reset_test_state();
+
+    printf("Confirming server and client sockets are open.\n");
+    if(passed)
+    {
+        //Checking that both sockets are initially working and reporting correctly
+        passed &= udp_isOpen(&clientUdpCommStruct);
+        passed &= udp_isOpen(&serverUdpCommStruct);
+    }
+
+    //Confirming data comm works to start with
+    if(passed)
+        passed &= biDirectionalCommCheck();
+
+    printf("Checking closing and reopening in client mode.\n");
+    if(passed)
+    {
+        udp_cleanup(&clientUdpCommStruct);
+        passed &= !udp_isOpen(&clientUdpCommStruct);
+    }
+
+    if(passed)
+    {
+        udp_init(&clientUdpCommStruct);
+        passed &= udp_isOpen(&clientUdpCommStruct);
+    }
+
+    if(passed)
+        passed &= biDirectionalCommCheck();
+
+    printf("Checking closing and reopening in server mode.\n");
+    if(passed)
+    {
+        udp_cleanup(&clientUdpCommStruct);
+        passed &= !udp_isOpen(&clientUdpCommStruct);
+    }
+
+    if(passed)
+    {
+        udp_init(&clientUdpCommStruct);
+        passed &= udp_isOpen(&clientUdpCommStruct);
+    }
+
+    if(passed)
+        passed &= biDirectionalCommCheck();
+
+    printf("Closing and Reopening Socket Test: %s\n", passed ? "PASSED" : "FAILED");
 
     return passed;
 }
