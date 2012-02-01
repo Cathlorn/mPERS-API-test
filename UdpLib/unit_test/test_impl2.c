@@ -257,7 +257,7 @@ int txSessionControlTest(void *args)
     int msgLength = sizeof(msg);
     HaloUdpStats stats = HALO_UDP_STATS_INIT();
     int stop = 0;
-    int timeout = 40; //40 second timeout
+    int timeout = 80; //in seconds
     int passed = 0;
     GenericIP socketAddress = GENERIC_IP_INIT();
     int stage = 0;
