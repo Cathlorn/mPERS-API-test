@@ -208,7 +208,8 @@ int udp_sendto(UdpCommStruct *commStruct, uint8 *data, int len,
         udpEventData.length = len;
         udpEventData.data = data;
         udpEventData.commStruct = commStruct;
-        commStruct->dataSent((void *) &udpEventData);
+        if(commStruct->dataSent)
+            commStruct->dataSent((void *) &udpEventData);
     }
 
     if (commStruct->debug)
