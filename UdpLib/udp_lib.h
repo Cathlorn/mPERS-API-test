@@ -62,6 +62,8 @@ UdpEventData;
 //Setup the port
 void udp_init(UdpCommStruct *commStruct);
 
+int udp_isOpen(UdpCommStruct *commStruct);
+
 //Handles tx and rx mangement
 void udp_tick(UdpCommStruct *commStruct);
 

@@ -149,6 +149,19 @@ void udp_init ( UdpCommStruct *commStruct )
     freeaddrinfo(result);
 }
 
+int udp_isOpen(UdpCommStruct *commStruct)
+{
+    int isOpen = 0;
+    PosixUdpData *posixDataPtr = (PosixUdpData *) commStruct->udpSocketDataPtr;
+
+    if(posixDataPtr)
+    {
+        isOpen = ( posixDataPtr->sock >= 0 );
+    }
+
+    return isOpen;
+}
+
 void udp_cleanup(UdpCommStruct *commStruct)
 {
     PosixUdpData *posixDataPtr = (PosixUdpData *) commStruct->udpSocketDataPtr;
