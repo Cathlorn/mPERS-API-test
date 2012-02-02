@@ -205,6 +205,7 @@ int reOpenTest(void *args)
 int clientBadWriteTest(void)
 {
     int passed = 0;
+    int success = 1;
     int timeout = 5;
     int stop = 0;
     GenericIP dstIP = GENERIC_IP_INIT();
@@ -217,27 +218,33 @@ int clientBadWriteTest(void)
     serverDataRcvd = 0;
 
     printf("Confirming server and client sockets are open.\n");
-    if (passed)
+    if (success)
     {
         //Checking that both sockets are initially working and reporting correctly
-        passed &= udp_isOpen(&clientUdpCommStruct);
-        passed &= udp_isOpen(&serverUdpCommStruct);
+        success &= udp_isOpen(&clientUdpCommStruct);
+        success &= udp_isOpen(&serverUdpCommStruct);
     }
 
-    udp_sendto(&clientUdpCommStruct, clientTxDataSample, sizeof(clientTxDataSample), dstIP);
-
-    do
+    if (success)
     {
-        sleep(1);
-        timeout--;
-    }
-    while ((!stop)&&(timeout));
+        udp_sendto(&clientUdpCommStruct, clientTxDataSample, sizeof(clientTxDataSample), dstIP);
 
-    if ((clientDataSent)&&(!serverDataRcvd))
-    {
-        //Confirmed there is a stop
-        stop = 1;
-        passed = 1;
+        do
+        {
+            if ((clientDataSent)||(serverDataRcvd))
+            {
+                //Confirmed there is a stop
+                stop = 1;
+            }
+            sleep(1);
+            timeout--;
+        }
+        while ((!stop)&&(timeout));
+
+        if ((!clientDataSent)&&(!serverDataRcvd))
+        {
+            passed = 1;
+        }
     }
 
     return passed;
@@ -246,6 +253,7 @@ int clientBadWriteTest(void)
 int serverBadWriteTest(void)
 {
     int passed = 0;
+    int success = 1;
     int timeout = 5;
     int stop = 0;
     GenericIP dstIP = GENERIC_IP_INIT();
@@ -258,27 +266,33 @@ int serverBadWriteTest(void)
     serverDataRcvd = 0;
 
     printf("Confirming server and client sockets are open.\n");
-    if (passed)
+    if (success)
     {
         //Checking that both sockets are initially working and reporting correctly
-        passed &= udp_isOpen(&clientUdpCommStruct);
-        passed &= udp_isOpen(&serverUdpCommStruct);
+        success &= udp_isOpen(&clientUdpCommStruct);
+        success &= udp_isOpen(&serverUdpCommStruct);
     }
 
-    udp_sendto(&serverUdpCommStruct, serverTxDataSample, sizeof(serverTxDataSample), dstIP);
-
-    do
+    if (success)
     {
-        sleep(1);
-        timeout--;
-    }
-    while ((!stop)&&(timeout));
+        udp_sendto(&serverUdpCommStruct, serverTxDataSample, sizeof(serverTxDataSample), dstIP);
 
-    if ((serverDataSent)&&(!clientDataRcvd))
-    {
-        //Confirmed there is a stop
-        stop = 1;
-        passed = 1;
+        do
+        {
+            if ((serverDataSent)||(clientDataRcvd))
+            {
+                //Confirmed there is a stop
+                stop = 1;
+            }
+            sleep(1);
+            timeout--;
+        }
+        while ((!stop)&&(timeout));
+
+        if ((!serverDataSent)&&(!clientDataRcvd))
+        {
+            passed = 1;
+        }
     }
 
     return passed;
