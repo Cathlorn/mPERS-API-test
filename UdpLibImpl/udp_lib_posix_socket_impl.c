@@ -190,20 +190,23 @@ void udp_cleanup(UdpCommStruct *commStruct)
 {
     PosixUdpData *posixDataPtr = (PosixUdpData *) commStruct->udpSocketDataPtr;
 
+    if(posixDataPtr)
+    {
     close ( posixDataPtr->sock );
     posixDataPtr->sock = -1;
 
     //TO DO: Make static implementation where dynamic cleanup is not needed
 
     //Dynamic Memory Allocation cleanup
-    if (commStruct->udpSocketDataPtr)
+    if (posixDataPtr)
     {
-        freePosixDataPointer(commStruct->udpSocketDataPtr);
+        freePosixDataPointer(posixDataPtr);
         commStruct->udpSocketDataPtr = NULL;
     }
 
     if (commStruct->debug)
-        printf ( "closing app.......\n" );
+        printf ( "closing udp connection\n" );
+    }
 }
 
 int udp_sendto(UdpCommStruct *commStruct, uint8 *data, int len,
@@ -215,6 +218,8 @@ int udp_sendto(UdpCommStruct *commStruct, uint8 *data, int len,
     socklen_t socketAddressLength;
     PosixUdpData *posixDataPtr = (PosixUdpData *) commStruct->udpSocketDataPtr;
 
+    if(posixDataPtr)
+    {
     socketAddress.sin_family = AF_INET;  // Internet/IP
     socketAddress.sin_port = htons ( socketIP.port ); // client port
     socketAddress.sin_addr.s_addr = socketIP.address;  // client IP address
@@ -238,6 +243,7 @@ int udp_sendto(UdpCommStruct *commStruct, uint8 *data, int len,
 
     if (commStruct->debug)
         printf("Sent %d bytes\n", sent);
+    }
 
     return sent;
 }
@@ -266,6 +272,8 @@ int udp_recv(UdpCommStruct *commStruct, uint8 *data, int max_len)
     PosixUdpData *posixDataPtr = (PosixUdpData *) commStruct->udpSocketDataPtr;
     GenericIP socketAddr;
 
+    if(posixDataPtr)
+    {
     if (commStruct->actAsServer)
     {
         sockAddrPtr = ( struct sockaddr_in * ) &posixDataPtr->clientAddr;
@@ -307,6 +315,7 @@ int udp_recv(UdpCommStruct *commStruct, uint8 *data, int max_len)
 
     if ((commStruct->debug)&&(received > 0))
         printf("Rcvd %d bytes\n", received);
+    }
 
     return received;
 }
