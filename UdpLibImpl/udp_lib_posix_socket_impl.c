@@ -89,6 +89,7 @@ void udp_init ( UdpCommStruct *commStruct )
     PosixUdpData *posixDataPtr = NULL;
 
     posixDataPtr = getPosixDataPointer();
+    assert(posixDataPtr);
     commStruct->udpSocketDataPtr = posixDataPtr;
 
     posixDataPtr->rcvAddrPtr = NULL;
@@ -100,8 +101,27 @@ void udp_init ( UdpCommStruct *commStruct )
 
     error = getaddrinfo(commStruct->hostname, commStruct->port, NULL, &result);
 
-    assert(!error);
-    assert(result);
+    if (error)
+    {
+        //Cleanup
+        freePosixDataPointer(posixDataPtr);
+        commStruct->udpSocketDataPtr = NULL;
+
+        if (result)
+        {
+            freeaddrinfo(result);
+        }
+
+        goto error_exit;
+    }
+
+    if (!result)
+    {
+        //Cleanup
+        freePosixDataPointer(posixDataPtr);
+        commStruct->udpSocketDataPtr = NULL;
+        goto error_exit;
+    }
 
     addrReadPtr = result;
 
@@ -123,7 +143,6 @@ void udp_init ( UdpCommStruct *commStruct )
         // Create the UDP socket
         if ( ( posixDataPtr->sock = socket ( PF_INET, SOCK_DGRAM, IPPROTO_UDP ) ) < 0 )
         {
-            //ErrorHandler ( "Failed to create socket" );
             printf ( "Failed to create socket\n" );
             assert(0);
         }
@@ -143,13 +162,18 @@ void udp_init ( UdpCommStruct *commStruct )
             if ( bind ( posixDataPtr->sock, ( struct sockaddr * ) &posixDataPtr->socketAddress, posixDataPtr->socketAddressLength ) )
             {
                 printf( "Failed to bind to port with server\n" );
-                assert(0);
+                //assert(0);
+
+                //Cleanup
+                freePosixDataPointer(posixDataPtr);
+                commStruct->udpSocketDataPtr = NULL;
+                freeaddrinfo(result);
+                goto error_exit;
             }
         }
         else
         {
             //Client
-
             posixDataPtr->socketAddress.sin_addr.s_addr = ((struct sockaddr_in *) addrReadPtr->ai_addr)->sin_addr.s_addr;  // IP address
         }
 
@@ -165,10 +189,18 @@ void udp_init ( UdpCommStruct *commStruct )
     {
         //Report error
         printf("Error! IPv4 Socket not first name lookup entry. Transfer will FAIL!\n");
-        assert(0);
+        //assert(0);
+        //Cleanup
+        freePosixDataPointer(posixDataPtr);
+        commStruct->udpSocketDataPtr = NULL;
+        freeaddrinfo(result);
+        goto error_exit;
     }
 
     freeaddrinfo(result);
+
+error_exit:
+    return;
 }
 
 int udp_isOpen(UdpCommStruct *commStruct)
