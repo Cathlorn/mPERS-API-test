@@ -3,22 +3,33 @@ CC=$1
 
 #Defaults to 'gcc' if no compiler is given
 if [ "$CC" = "" ]; then
-CC=gcc
+  CC=gcc
 fi
 
-$CC -lpthread -o halo_udp_test client_mode.c \
-client_test_impl.c \
-client_tests.c \
-DynamicVitalsMsg.c \
-HaloMsgHelperFunctions.c \
-main.c \
-server_mode.c \
-server_tests.c \
-tests.c \
-UdpLib/halo_udp_tx_mgmt.c \
-UdpLib/halo_udp_stats.c \
-UdpLib/tx_mgmt_buffer.c \
-UdpLib/udp_lib_posix_socket_impl.c \
-UdpLib/halo_udp_comm.c \
-UdpLib/tx_buffer_static.c \
-UdpLib/crc16.c
+echo "Building Unit Tests"
+./build-unit-test.sh $CC
+./run-unit-test.sh
+BUILD_APPS=0
+UNIT_TESTS_PASSED=$?
+
+if [ $UNIT_TESTS_PASSED -eq 0 ]; then
+  echo "Unit tests have failed. Do you want to proceed with building? (Y/N)"
+  PROMPT_RESULT="N"
+  read -t 10 PROMPT_RESULT
+  if [[ ("$PROMPT_RESULT" == "Y") || ("$PROMPT_RESULT" == "y") ]]; then
+    echo "Proceeding with building despite failed unit test."
+    BUILD_APPS=1
+  else
+    echo "ABORTING BUILD!!!!"
+    BUILD_APPS=0
+  fi
+else
+  BUILD_APPS=1
+fi
+
+#Performs the actual building of apps
+if (( $BUILD_APPS )); then
+  echo "Building Applications"
+  ./build-dvt.sh $CC
+  ./build_debug_app_linux.sh $CC
+fi

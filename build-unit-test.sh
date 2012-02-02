@@ -24,7 +24,7 @@ UdpLib/unit_test/main.c \
 Test/tests.c \
 UdpLib/unit_test/test_msg_queue.c
 
-$CC -I . -lpthread -o halo_udp_unit_test mpers/DynamicVitalsMsg.c \
+$CC -I . -lpthread -o udp_unit_test mpers/DynamicVitalsMsg.c \
 mpers/HaloMsgHelperFunctions.c \
 General/genericStaticArrayBuffer.c \
 UdpLib/halo_udp_tx_mgmt.c \
