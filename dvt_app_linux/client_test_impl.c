@@ -24,9 +24,12 @@ int sendDynamicVitalsPkt(void *args)
     int stop = 0;
     int timeout = 10; //second timeout
     int numMsgsToSend = 1;
+    int numMsgsSent = 0;
+    int usCount = 0;
+    int burstSize = 20;
     int i = 0;
 
-    if(args)
+    if (args)
     {
         numMsgsToSend = atoi((char *) args);
         timeout *= numMsgsToSend;
@@ -62,10 +65,12 @@ int sendDynamicVitalsPkt(void *args)
     //Clear stats
     halo_msg_reset_stats();
 
-    for(i = 0; i < numMsgsToSend; i++)
+    //Send a burst of msgs
+    for (i = 0; (i < burstSize) && (numMsgsSent < numMsgsToSend); i++)
     {
         //Do a generic send with vitals msg
         halo_msg_send((HaloMessage *) dynamicVitalsBuffer);
+        numMsgsSent++;
     }
 
     do
@@ -81,11 +86,26 @@ int sendDynamicVitalsPkt(void *args)
             stop = 1;
             passed = 1;
         }
+        else if ((stats.txPkts == numMsgsSent)&&(stats.txDataPkts == numMsgsSent)
+                 &&(stats.txConfirmedPkts == numMsgsSent)
+                 &&(stats.rxAcks == numMsgsSent))
+        {
+            //Send a burst of msgs
+            for (i = 0; (i < burstSize) && (numMsgsSent < numMsgsToSend); i++)
+            {
+                //Do a generic send with vitals msg
+                halo_msg_send((HaloMessage *) dynamicVitalsBuffer);
+                numMsgsSent++;
+            }
+        }
 
-        printf("%d of %d confirmed sent (%d transmitted)\n", stats.txConfirmedPkts, numMsgsToSend, stats.txDataPkts);
-
-        sleep(1);
-        timeout--;
+        usleep(2000); //2ms
+        usCount++;
+        if ((usCount % 500) == 499) //Report every second
+        {
+            printf("%d of %d confirmed sent (%d transmitted)\n", stats.txConfirmedPkts, numMsgsToSend, stats.txDataPkts);
+            timeout--;
+        }
     }
     while ((!stop)&&(timeout));
 
@@ -108,9 +128,12 @@ int sendPanicMsgPkt(void *args)
     int stop = 0;
     int timeout = 10; //second timeout
     int numMsgsToSend = 1;
+    int numMsgsSent = 0;
+    int usCount = 0;
+    int burstSize = 20;
     int i = 0;
 
-    if(args)
+    if (args)
     {
         numMsgsToSend = atoi((char *) args);
         timeout *= numMsgsToSend;
@@ -125,9 +148,12 @@ int sendPanicMsgPkt(void *args)
     //Clear stats
     halo_msg_reset_stats();
 
-    for(i = 0; i < numMsgsToSend; i++)
+    //Send a burst of msgs
+    for (i = 0; (i < burstSize) && (numMsgsSent < numMsgsToSend); i++)
     {
+        //Do a generic send
         halo_msg_send((HaloMessage *) &panicMsg);
+        numMsgsSent++;
     }
 
     do
@@ -143,11 +169,26 @@ int sendPanicMsgPkt(void *args)
             stop = 1;
             passed = 1;
         }
+        else if ((stats.txPkts == numMsgsSent)&&(stats.txDataPkts == numMsgsSent)
+                 &&(stats.txConfirmedPkts == numMsgsSent)
+                 &&(stats.rxAcks == numMsgsSent))
+        {
+            //Send a burst of msgs
+            for (i = 0; (i < burstSize) && (numMsgsSent < numMsgsToSend); i++)
+            {
+                //Do a generic send
+                halo_msg_send((HaloMessage *) &panicMsg);
+                numMsgsSent++;
+            }
+        }
 
-        printf("%d of %d confirmed sent (%d transmitted)\n", stats.txConfirmedPkts, numMsgsToSend, stats.txDataPkts);
-
-        sleep(1);
-        timeout--;
+        usleep(2000); //2ms
+        usCount++;
+        if ((usCount % 500) == 499) //Report every second
+        {
+            printf("%d of %d confirmed sent (%d transmitted)\n", stats.txConfirmedPkts, numMsgsToSend, stats.txDataPkts);
+            timeout--;
+        }
     }
     while ((!stop)&&(timeout));
 
@@ -170,9 +211,12 @@ int sendFallMsgPkt(void *args)
     int stop = 0;
     int timeout = 10; //second timeout
     int numMsgsToSend = 1;
+    int numMsgsSent = 0;
+    int usCount = 0;
+    int burstSize = 20;
     int i = 0;
 
-    if(args)
+    if (args)
     {
         numMsgsToSend = atoi((char *) args);
         timeout *= numMsgsToSend;
@@ -187,7 +231,7 @@ int sendFallMsgPkt(void *args)
     //Clear stats
     halo_msg_reset_stats();
 
-    for(i = 0; i < numMsgsToSend; i++)
+    for (i = 0; i < numMsgsToSend; i++)
     {
         halo_msg_send((HaloMessage *) &fallMsg);
     }
@@ -205,11 +249,26 @@ int sendFallMsgPkt(void *args)
             stop = 1;
             passed = 1;
         }
+        else if ((stats.txPkts == numMsgsSent)&&(stats.txDataPkts == numMsgsSent)
+                 &&(stats.txConfirmedPkts == numMsgsSent)
+                 &&(stats.rxAcks == numMsgsSent))
+        {
+            //Send a burst of msgs
+            for (i = 0; (i < burstSize) && (numMsgsSent < numMsgsToSend); i++)
+            {
+                //Do a generic send
+                halo_msg_send((HaloMessage *) &fallMsg);
+                numMsgsSent++;
+            }
+        }
 
-        printf("%d of %d confirmed sent (%d transmitted)\n", stats.txConfirmedPkts, numMsgsToSend, stats.txDataPkts);
-
-        sleep(1);
-        timeout--;
+        usleep(2000); //2ms
+        usCount++;
+        if ((usCount % 500) == 499) //Report every second
+        {
+            printf("%d of %d confirmed sent (%d transmitted)\n", stats.txConfirmedPkts, numMsgsToSend, stats.txDataPkts);
+            timeout--;
+        }
     }
     while ((!stop)&&(timeout));
 
@@ -231,9 +290,12 @@ int sendOperatorAckMsgPkt(void *args)
     int stop = 0;
     int timeout = 10; //second timeout
     int numMsgsToSend = 1;
+    int numMsgsSent = 0;
+    int usCount = 0;
+    int burstSize = 20;
     int i = 0;
 
-    if(args)
+    if (args)
     {
         numMsgsToSend = atoi((char *) args);
         timeout *= numMsgsToSend;
@@ -248,9 +310,12 @@ int sendOperatorAckMsgPkt(void *args)
     //Clear stats
     halo_msg_reset_stats();
 
-    for(i = 0; i < numMsgsToSend; i++)
+    //Send a burst of msgs
+    for (i = 0; (i < burstSize) && (numMsgsSent < numMsgsToSend); i++)
     {
+        //Do a generic send
         halo_msg_send((HaloMessage *) &operatorAckMsg);
+        numMsgsSent++;
     }
 
     do
@@ -266,11 +331,26 @@ int sendOperatorAckMsgPkt(void *args)
             stop = 1;
             passed = 1;
         }
+        else if ((stats.txPkts == numMsgsSent)&&(stats.txDataPkts == numMsgsSent)
+                 &&(stats.txConfirmedPkts == numMsgsSent)
+                 &&(stats.rxAcks == numMsgsSent))
+        {
+            //Send a burst of msgs
+            for (i = 0; (i < burstSize) && (numMsgsSent < numMsgsToSend); i++)
+            {
+                //Do a generic send
+                halo_msg_send((HaloMessage *) &operatorAckMsg);
+                numMsgsSent++;
+            }
+        }
 
-        printf("%d of %d confirmed sent (%d transmitted)\n", stats.txConfirmedPkts, numMsgsToSend, stats.txDataPkts);
-
-        sleep(1);
-        timeout--;
+        usleep(2000); //2ms
+        usCount++;
+        if ((usCount % 500) == 499) //Report every second
+        {
+            printf("%d of %d confirmed sent (%d transmitted)\n", stats.txConfirmedPkts, numMsgsToSend, stats.txDataPkts);
+            timeout--;
+        }
     }
     while ((!stop)&&(timeout));
 
@@ -292,9 +372,12 @@ int sendInvalidMsgPkt(void *args)
     int stop = 0;
     int timeout = 10; //second timeout
     int numMsgsToSend = 1;
+    int numMsgsSent = 0;
+    int usCount = 0;
+    int burstSize = 20;
     int i = 0;
 
-    if(args)
+    if (args)
     {
         numMsgsToSend = atoi((char *) args);
         timeout *= numMsgsToSend;
@@ -303,9 +386,12 @@ int sendInvalidMsgPkt(void *args)
     //Clear stats
     halo_msg_reset_stats();
 
-    for(i = 0; i < numMsgsToSend; i++)
+    //Send a burst of msgs
+    for (i = 0; (i < burstSize) && (numMsgsSent < numMsgsToSend); i++)
     {
+        //Do a generic send
         halo_msg_send((HaloMessage *) &invalidMsg[0]);
+        numMsgsSent++;
     }
 
     do
@@ -321,9 +407,68 @@ int sendInvalidMsgPkt(void *args)
             stop = 1;
             passed = 1;
         }
+        else if ((stats.txPkts == numMsgsSent)&&(stats.txDataPkts == numMsgsSent)
+                 &&(stats.txConfirmedPkts == numMsgsSent)
+                 &&(stats.rxAcks == numMsgsSent))
+        {
+            //Send a burst of msgs
+            for (i = 0; (i < burstSize) && (numMsgsSent < numMsgsToSend); i++)
+            {
+                //Do a generic send
+                halo_msg_send((HaloMessage *) &invalidMsg[0]);
+                numMsgsSent++;
+            }
+        }
 
-        printf("%d of %d confirmed sent (%d transmitted)\n", stats.txConfirmedPkts, numMsgsToSend, stats.txDataPkts);
+        usleep(2000); //2ms
+        usCount++;
+        if ((usCount % 500) == 499) //Report every second
+        {
+            printf("%d of %d confirmed sent (%d transmitted)\n", stats.txConfirmedPkts, numMsgsToSend, stats.txDataPkts);
+            timeout--;
+        }
+    }
+    while ((!stop)&&(timeout));
 
+    if (!timeout)
+    {
+        printf("Test Timed Out!\n");
+    }
+
+    printf("Invalid mPERS Format Msg Test: %s\n", passed ? "PASSED" : "FAILED");
+
+    return passed;
+}
+
+int listenMsg(void *args)
+{
+    int passed = 0;
+    HaloUdpStats stats = HALO_UDP_STATS_INIT();
+    int stop = 0;
+    int timeout = 10; //second timeout
+    int numMsgsToRecv = 1;
+
+    if (args)
+    {
+        numMsgsToRecv = atoi((char *) args);
+        timeout *= numMsgsToRecv;
+    }
+
+    //Clear stats
+    halo_msg_reset_stats();
+
+    do
+    {
+        stats = get_halo_msg_stats();
+
+        if ((stats.rxGoodPkts == numMsgsToRecv)&&(stats.rxDataPkts == numMsgsToRecv))
+        {
+            //Confirmed there is a stop
+            stop = 1;
+            passed = 1;
+        }
+
+        printf("%d of %d msgs received\n", stats.rxDataPkts, numMsgsToRecv);
         sleep(1);
         timeout--;
     }
@@ -334,7 +479,7 @@ int sendInvalidMsgPkt(void *args)
         printf("Test Timed Out!\n");
     }
 
-    printf("Invalid mPERS Format Msg Test: %s\n", passed ? "PASSED" : "FAILED");
+    printf("Listen mPERS Msg Test: %s\n", passed ? "PASSED" : "FAILED");
 
     return passed;
 }

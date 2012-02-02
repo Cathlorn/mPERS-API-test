@@ -8,7 +8,7 @@ const TestItem packetTests[] =
     {"Send Fall Msg", sendFallMsgPkt},
     {"Send Operator Acknowledgement Msg", sendOperatorAckMsgPkt},
     {"Send Invalid Msg", sendInvalidMsgPkt},
-    {"Listen for Msgs", sendFallMsgPkt},
+    {"Listen for Msgs", listenMsg},
 };
 
 TestSuite packetTesting =
