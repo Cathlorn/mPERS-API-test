@@ -1,0 +1,86 @@
+*=to be completed
+Tests Supported:
+
+Rx Good
+Rx Out of Sequence Msgs
+Rx Session Control
+Rx Duplicate
+Rx Runt
+Rx Corrupted Pkt
+*Rx Invalid Payload Length
+Rx Beyond Sequence Number Capacity
+
+Tx Good
+Tx Comm Failure
+Tx Session Control
+Tx Beyond Sequence Number Capacity
+
+Test Descriptions:
+
+[Test Rx Good]
+->Confirm that when a valid packet is received, an acknowledgement is sent to the sender of the packet.
+->Confirm that when a valid packet is received, the receive message handler is called
+->Confirm that statistics are updated to reflect changes
+
+[Test Rx Out of Sequence Msgs]
+->Confirm that M (where M is >= 5) msgs are able to be received by the receiver with random sequence numbers (unique from each other) without any errors.
+->Confirm that M (where M is >= 5) msgs are able to be received by the receiver with random sequence numbers (unique from each other) with a report of M good data packets.
+->Confirm that M (where M is >= 5) msgs are able to be received by the receiver with random sequence numbers (unique from each other) with a report of M receive handler calls.
+
+[Test Rx Session Control]
+->Confirm that multiple new sessions from the sender are responded to by the receiver with 'session_restarted'
+
+[Test Rx Duplicate]
+->Confirm that the first time the packet is received, it is properly acknowledged
+->Confirm that the first time the packet is received, the receive message handler is called
+->Confirm that repeats of the same packet are acknowledged.
+->Confirm that the receive handler is NOT called for duplicate packets.
+->Confirm that receiving multiples of the same packet caused only one call to the receiver handler
+->Confirm that receiving N of the same packet results in a detection of N-1 duplicates and 1 Good Data packet
+->Confirm that receiving multiples of the same good packet results in no new packet errors.
+->Confirm that statistics are updated to reflect changes
+
+[Test Rx Runt]
+->Confirm that when a packet is received that is smaller than the minimum packet size, it is NOT acknowleged.
+->Confirm that when a packet is received that is smaller than the minimum packet size, the msg received handler is NOT called.
+->Confirm that when a packet is received that is smaller than the minimum packet size, it is detected as a runt.
+->Confirm that when a packet is received that is smaller than the minimum packet size, it is silently dropped.
+->Confirm that statistics are updated to reflect changes.
+
+[Test Rx Corrupted Pkt]
+->Confirm that when a corrupted packet is received, it is NOT acknowleged.
+->Confirm that when a corrupted packet is received, the msg received handler is NOT called.
+->Confirm that when a corrupted packet is received, it is detected as a corrupted packet.
+->Confirm that when a corrupted packet is received, it is silently dropped.
+->Confirm that statistics are updated to reflect changes.
+
+[Test Rx Invalid Payload Length]
+->Confirm that when a packet is received advertises a larger payload than available in the space of the packet, it is NOT acknowleged.
+->Confirm that when a packet is received advertises a larger payload than available in the space of the packet, the msg received handler is NOT called.
+->Confirm that when a packet is received advertises a larger payload than available in the space of the packet, it is detected as having an invalid payload length
+->Confirm that when a packet is received advertises a larger payload than available in the space of the packet, it is silently dropped.
+->Confirm that statistics are updated to reflect changes.
+
+[Test Rx Beyond Sequence Number Capacity]
+->Assuming the sequence number has a capacity of U unique numbers, confirm that a receiver can handle the receipt of U + 1 messages where the messages are delivered in order of incrementing sequence number, including rollover (so at least 1 message should share the same sequence number).
+
+
+
+[Test Tx Good]
+->Confirm that that sender stops sending a packet once it receives an acknowledgement from the receiver
+->Confirm that the tx sequence number changes with each transmission
+
+[Test Tx Comm Failure]
+->Confirm that the maximum number of send attempts, N, are performed by the sender when an acknowledgement is never issued by the receiver
+->Confirm that after N attempts the message is dropped.
+->Confirm that prior to dropping any message notification is given to the drop handler
+->Confirm that statistics are updated to reflect changes
+
+[Test Tx Session Control]
+->Confirm that a new session from the sender continues to keep new session flag set after a tx drop
+->Confirm that a new session from the sender completes when receiver sends a 'session_restarted'
+
+[Test Tx Beyond Sequence Number Capacity]
+->Assuming the sequence number has a capacity of U unique numbers, confirm that at least U + 1 messages can be successfully transmitted (i.e. acknowledged) from a sender to a receiver.
+
+
