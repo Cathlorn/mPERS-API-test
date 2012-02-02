@@ -1,8 +1,7 @@
 //UDP Communications Library
 //CLS (Halo Monitoring)
 //ATTENTION: Code requires UDP IPv4. Will quit if not supported
-//TO DO: Add support for IPv6 UDP
-//TODO: Create an implementation that retreives bytes from a static pool either of PosixUDP Data structures or from generic bytes.
+//TODO: Add support for IPv6 UDP
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -26,7 +25,6 @@
 #include "General/genericStaticArrayBuffer.h"
 
 static PosixUdpData posixDataArray[POSIX_DATA_ARRAY_SIZE];
-//static int posixDataArrayCount = 0;
 
 static int posixTableInitialized = 0;
 static BufferTable posixDataBufferTable;
@@ -37,7 +35,7 @@ void initPosixDataTable()
     int i;
     initBufferTable(&posixDataBufferTable, posixDataBufferEntries, sizeof(posixDataBufferEntries)/sizeof(BufferTableEntry));
 
-    for(i = 0; i < posixDataBufferTable.maxNumberOfEntries; i++)
+    for (i = 0; i < posixDataBufferTable.maxNumberOfEntries; i++)
     {
         assignData(&posixDataBufferTable, i, &posixDataArray[i], sizeof(PosixUdpData));
     }
@@ -54,7 +52,7 @@ PosixUdpData * getPosixDataPointer(void)
 #else
     int max_length = 0;
 
-    if(!posixTableInitialized)
+    if (!posixTableInitialized)
     {
         initPosixDataTable();
         posixTableInitialized = 1;
@@ -178,7 +176,7 @@ int udp_isOpen(UdpCommStruct *commStruct)
     int isOpen = 0;
     PosixUdpData *posixDataPtr = (PosixUdpData *) commStruct->udpSocketDataPtr;
 
-    if(posixDataPtr)
+    if (posixDataPtr)
     {
         isOpen = ( posixDataPtr->sock >= 0 );
     }
@@ -190,22 +188,20 @@ void udp_cleanup(UdpCommStruct *commStruct)
 {
     PosixUdpData *posixDataPtr = (PosixUdpData *) commStruct->udpSocketDataPtr;
 
-    if(posixDataPtr)
-    {
-    close ( posixDataPtr->sock );
-    posixDataPtr->sock = -1;
-
-    //TO DO: Make static implementation where dynamic cleanup is not needed
-
-    //Dynamic Memory Allocation cleanup
     if (posixDataPtr)
     {
-        freePosixDataPointer(posixDataPtr);
-        commStruct->udpSocketDataPtr = NULL;
-    }
+        close ( posixDataPtr->sock );
+        posixDataPtr->sock = -1;
 
-    if (commStruct->debug)
-        printf ( "closing udp connection\n" );
+        //Dynamic Memory Allocation cleanup
+        if (posixDataPtr)
+        {
+            freePosixDataPointer(posixDataPtr);
+            commStruct->udpSocketDataPtr = NULL;
+        }
+
+        if (commStruct->debug)
+            printf ( "closing udp connection\n" );
     }
 }
 
@@ -218,31 +214,31 @@ int udp_sendto(UdpCommStruct *commStruct, uint8 *data, int len,
     socklen_t socketAddressLength;
     PosixUdpData *posixDataPtr = (PosixUdpData *) commStruct->udpSocketDataPtr;
 
-    if(posixDataPtr)
+    if (posixDataPtr)
     {
-    socketAddress.sin_family = AF_INET;  // Internet/IP
-    socketAddress.sin_port = htons ( socketIP.port ); // client port
-    socketAddress.sin_addr.s_addr = socketIP.address;  // client IP address
-    socketAddressLength = sizeof(struct sockaddr_in); //This MUST be initialized for receiving to work
+        socketAddress.sin_family = AF_INET;  // Internet/IP
+        socketAddress.sin_port = htons ( socketIP.port ); // client port
+        socketAddress.sin_addr.s_addr = socketIP.address;  // client IP address
+        socketAddressLength = sizeof(struct sockaddr_in); //This MUST be initialized for receiving to work
 
-    commStruct->sendData   = data;
-    commStruct->sendLength = len;
+        commStruct->sendData   = data;
+        commStruct->sendLength = len;
 
-    sent = sendto ( posixDataPtr->sock, data, len, 0,
-                    (struct sockaddr *) &socketAddress,
-                    socketAddressLength );
+        sent = sendto ( posixDataPtr->sock, data, len, 0,
+                        (struct sockaddr *) &socketAddress,
+                        socketAddressLength );
 
-    if(sent > 0)
-    {
-        udpEventData.length = len;
-        udpEventData.data = data;
-        udpEventData.commStruct = commStruct;
-        if(commStruct->dataSent)
-            commStruct->dataSent((void *) &udpEventData);
-    }
+        if (sent > 0)
+        {
+            udpEventData.length = len;
+            udpEventData.data = data;
+            udpEventData.commStruct = commStruct;
+            if (commStruct->dataSent)
+                commStruct->dataSent((void *) &udpEventData);
+        }
 
-    if (commStruct->debug)
-        printf("Sent %d bytes\n", sent);
+        if (commStruct->debug)
+            printf("Sent %d bytes\n", sent);
     }
 
     return sent;
@@ -272,49 +268,49 @@ int udp_recv(UdpCommStruct *commStruct, uint8 *data, int max_len)
     PosixUdpData *posixDataPtr = (PosixUdpData *) commStruct->udpSocketDataPtr;
     GenericIP socketAddr;
 
-    if(posixDataPtr)
+    if (posixDataPtr)
     {
-    if (commStruct->actAsServer)
-    {
-        sockAddrPtr = ( struct sockaddr_in * ) &posixDataPtr->clientAddr;
-        sockAddrLenPtr = (socklen_t *) &posixDataPtr->clientAddr_len;
-    }
-    else
-    {
-        sockAddrPtr = ( struct sockaddr_in * ) &posixDataPtr->socketAddress;
-        sockAddrLenPtr = (socklen_t *) &posixDataPtr->socketAddressLength;
-    }
+        if (commStruct->actAsServer)
+        {
+            sockAddrPtr = ( struct sockaddr_in * ) &posixDataPtr->clientAddr;
+            sockAddrLenPtr = (socklen_t *) &posixDataPtr->clientAddr_len;
+        }
+        else
+        {
+            sockAddrPtr = ( struct sockaddr_in * ) &posixDataPtr->socketAddress;
+            sockAddrLenPtr = (socklen_t *) &posixDataPtr->socketAddressLength;
+        }
 
-    assert(sockAddrPtr);
-    assert(sockAddrLenPtr);
+        assert(sockAddrPtr);
+        assert(sockAddrLenPtr);
 
-    *sockAddrLenPtr = sizeof(struct sockaddr_in);  //Makes sure the maximum size can return back is passed in (needed for recvfrom to work correctly)
-    received = recvfrom ( posixDataPtr->sock, data, max_len, 0,
-                          (struct sockaddr *) sockAddrPtr,
-                          sockAddrLenPtr);
+        *sockAddrLenPtr = sizeof(struct sockaddr_in);  //Makes sure the maximum size can return back is passed in (needed for recvfrom to work correctly)
+        received = recvfrom ( posixDataPtr->sock, data, max_len, 0,
+                              (struct sockaddr *) sockAddrPtr,
+                              sockAddrLenPtr);
 
 
-    commStruct->recvData = data;
-    commStruct->recvLength = received;
-    posixDataPtr->rcvAddrPtr = sockAddrPtr;
-    posixDataPtr->rcvAddrLenPtr = sockAddrLenPtr;
+        commStruct->recvData = data;
+        commStruct->recvLength = received;
+        posixDataPtr->rcvAddrPtr = sockAddrPtr;
+        posixDataPtr->rcvAddrLenPtr = sockAddrLenPtr;
 
-    //Read POSIX socket to populate Generic IP Address
-    socketAddr.address = sockAddrPtr->sin_addr.s_addr;
-    socketAddr.port = ntohs(sockAddrPtr->sin_port);
-    commStruct->rcvIP = socketAddr;
+        //Read POSIX socket to populate Generic IP Address
+        socketAddr.address = sockAddrPtr->sin_addr.s_addr;
+        socketAddr.port = ntohs(sockAddrPtr->sin_port);
+        commStruct->rcvIP = socketAddr;
 
-    if (commStruct->actAsServer)
-    {
-        commStruct->clientIP = socketAddr;
-    }
-    else
-    {
-        commStruct->socketIP = socketAddr;
-    }
+        if (commStruct->actAsServer)
+        {
+            commStruct->clientIP = socketAddr;
+        }
+        else
+        {
+            commStruct->socketIP = socketAddr;
+        }
 
-    if ((commStruct->debug)&&(received > 0))
-        printf("Rcvd %d bytes\n", received);
+        if ((commStruct->debug)&&(received > 0))
+            printf("Rcvd %d bytes\n", received);
     }
 
     return received;
