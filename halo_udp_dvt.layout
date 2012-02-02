@@ -4,6 +4,9 @@
 	<File name="UdpLib/halo_udp_comm.c" open="0" top="0" tabpos="0">
 		<Cursor position="35764" topLine="984" />
 	</File>
+	<File name="UdpLib/tx_buffer_static.c" open="1" top="0" tabpos="0">
+		<Cursor position="0" topLine="0" />
+	</File>
 	<File name="dvt_app_linux/client_mode.c" open="0" top="0" tabpos="0">
 		<Cursor position="2944" topLine="100" />
 	</File>

@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
 <CodeBlocks_workspace_file>
 	<Workspace title="Workspace">
-		<Project filename="mPERS-api-test-srv.cbp" />
+		<Project filename="mPERS-api-test-srv.cbp" active="1" />
 		<Project filename="unit_test.cbp" />
 		<Project filename="halo_udp_dvt.cbp" />
-		<Project filename="udp_unit_test.cbp" active="1" />
+		<Project filename="udp_unit_test.cbp" />
 	</Workspace>
 </CodeBlocks_workspace_file>
