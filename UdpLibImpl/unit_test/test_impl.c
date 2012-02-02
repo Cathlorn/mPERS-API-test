@@ -286,7 +286,7 @@ int serverBadWriteTest(void)
 
 int badAddrWriteTest(void *args)
 {
-    int passed = 0;
+    int passed = 1;
 
     reset_test_state();
 
@@ -373,7 +373,7 @@ int clientNoDataAvailableTest(void)
 
 int noDataAvailableTest(void *args)
 {
-    int passed = 0;
+    int passed = 1;
 
     reset_test_state();
 
@@ -402,7 +402,7 @@ int noDataAvailableTest(void *args)
 
 int clientBogusNameCheck(void)
 {
-    int passed = 0;
+    int passed = 1;
     char tempHostName[] = "badName";
     char oldHostName[1024] = "";
 
@@ -454,7 +454,7 @@ int clientBogusNameCheck(void)
 
 int clientBogusPortCheck(void)
 {
-    int passed = 0;
+    int passed = 1;
     char tempPortName[] = "-53";
     char oldPortName[1024] = "";
 
@@ -507,7 +507,7 @@ int clientBogusPortCheck(void)
 
 int serverBogusNameCheck(void)
 {
-    int passed = 0;
+    int passed = 1;
     char tempHostName[] = "badName";
     char oldHostName[1024] = "";
 
@@ -559,7 +559,7 @@ int serverBogusNameCheck(void)
 
 int serverBogusPortCheck(void)
 {
-    int passed = 0;
+    int passed = 1;
     char tempPortName[] = "-53";
     char oldPortName[1024] = "";
 
@@ -611,7 +611,7 @@ int serverBogusPortCheck(void)
 
 int badNetworkConfigTest(void *args)
 {
-    int passed = 0;
+    int passed = 1;
 
     reset_test_state();
 
