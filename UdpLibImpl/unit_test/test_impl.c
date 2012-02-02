@@ -89,7 +89,7 @@ int commTest_ServerRcvdCallback(void *args)
 int biDirectionalCommCheck()
 {
     int passed = 0;
-    int timeout = 40;
+    int timeout = 5;
     int stop = 0;
 
     reset_test_state();
@@ -146,7 +146,7 @@ int reOpenTest(void *args)
     reset_test_state();
 
     printf("Confirming server and client sockets are open.\n");
-    if(passed)
+    if (passed)
     {
         //Checking that both sockets are initially working and reporting correctly
         passed &= udp_isOpen(&clientUdpCommStruct);
@@ -154,42 +154,496 @@ int reOpenTest(void *args)
     }
 
     //Confirming data comm works to start with
-    if(passed)
+    if (passed)
         passed &= biDirectionalCommCheck();
 
     printf("Checking closing and reopening in client mode.\n");
-    if(passed)
+    if (passed)
     {
         udp_cleanup(&clientUdpCommStruct);
         passed &= !udp_isOpen(&clientUdpCommStruct);
     }
 
-    if(passed)
+    printf("Checking comm doesn't work on a closed client.\n");
+    if (passed)
+        passed &= !biDirectionalCommCheck();
+
+    if (passed)
     {
         udp_init(&clientUdpCommStruct);
         passed &= udp_isOpen(&clientUdpCommStruct);
     }
 
-    if(passed)
+    if (passed)
         passed &= biDirectionalCommCheck();
 
     printf("Checking closing and reopening in server mode.\n");
-    if(passed)
+    if (passed)
     {
         udp_cleanup(&clientUdpCommStruct);
         passed &= !udp_isOpen(&clientUdpCommStruct);
     }
 
-    if(passed)
+    printf("Checking comm doesn't work on a closed server.\n");
+    if (passed)
+        passed &= !biDirectionalCommCheck();
+
+    if (passed)
     {
         udp_init(&clientUdpCommStruct);
         passed &= udp_isOpen(&clientUdpCommStruct);
     }
 
-    if(passed)
+    if (passed)
         passed &= biDirectionalCommCheck();
 
     printf("Closing and Reopening Socket Test: %s\n", passed ? "PASSED" : "FAILED");
+
+    return passed;
+}
+
+int clientBadWriteTest(void)
+{
+    int passed = 0;
+    int timeout = 5;
+    int stop = 0;
+    GenericIP dstIP = GENERIC_IP_INIT();
+
+    reset_test_state();
+
+    clientDataSent = 0;
+    clientDataRcvd = 0;
+    serverDataSent = 0;
+    serverDataRcvd = 0;
+
+    printf("Confirming server and client sockets are open.\n");
+    if (passed)
+    {
+        //Checking that both sockets are initially working and reporting correctly
+        passed &= udp_isOpen(&clientUdpCommStruct);
+        passed &= udp_isOpen(&serverUdpCommStruct);
+    }
+
+    udp_sendto(&clientUdpCommStruct, clientTxDataSample, sizeof(clientTxDataSample), dstIP);
+
+    do
+    {
+        sleep(1);
+        timeout--;
+    }
+    while ((!stop)&&(timeout));
+
+    if ((clientDataSent)&&(!serverDataRcvd))
+    {
+        //Confirmed there is a stop
+        stop = 1;
+        passed = 1;
+    }
+
+    return passed;
+}
+
+int serverBadWriteTest(void)
+{
+    int passed = 0;
+    int timeout = 5;
+    int stop = 0;
+    GenericIP dstIP = GENERIC_IP_INIT();
+
+    reset_test_state();
+
+    clientDataSent = 0;
+    clientDataRcvd = 0;
+    serverDataSent = 0;
+    serverDataRcvd = 0;
+
+    printf("Confirming server and client sockets are open.\n");
+    if (passed)
+    {
+        //Checking that both sockets are initially working and reporting correctly
+        passed &= udp_isOpen(&clientUdpCommStruct);
+        passed &= udp_isOpen(&serverUdpCommStruct);
+    }
+
+    udp_sendto(&serverUdpCommStruct, serverTxDataSample, sizeof(serverTxDataSample), dstIP);
+
+    do
+    {
+        sleep(1);
+        timeout--;
+    }
+    while ((!stop)&&(timeout));
+
+    if ((serverDataSent)&&(!clientDataRcvd))
+    {
+        //Confirmed there is a stop
+        stop = 1;
+        passed = 1;
+    }
+
+    return passed;
+}
+
+int badAddrWriteTest(void *args)
+{
+    int passed = 0;
+
+    reset_test_state();
+
+    printf("Confirming server and client sockets are open.\n");
+    if (passed)
+    {
+        //Checking that both sockets are initially working and reporting correctly
+        passed &= udp_isOpen(&clientUdpCommStruct);
+        passed &= udp_isOpen(&serverUdpCommStruct);
+    }
+
+    if (passed)
+        passed &= serverBadWriteTest();
+
+    if (passed)
+        passed &= clientBadWriteTest();
+
+    printf("Bad Addr Write Test: %s\n", passed ? "PASSED" : "FAILED");
+
+    return passed;
+}
+
+int serverNoDataAvailableTest(void)
+{
+    unsigned char buffer[1024];
+    int passed = 0;
+    int timeout = 5;
+    int stop = 0;
+    int dataFound = 0;
+
+    reset_test_state();
+
+    do
+    {
+        if (udp_recv(&serverUdpCommStruct, buffer, sizeof(buffer)) > 0)
+        {
+            //Confirmed there is a stop
+            stop = 1;
+            dataFound = 1;
+        }
+        sleep(1);
+        timeout--;
+    }
+    while ((!stop)&&(timeout));
+
+    if ((!dataFound)&&(!serverDataRcvd))
+    {
+        passed = 1;
+    }
+
+    return passed;
+}
+
+int clientNoDataAvailableTest(void)
+{
+    unsigned char buffer[1024];
+    int passed = 0;
+    int timeout = 5;
+    int stop = 0;
+    int dataFound = 0;
+
+    reset_test_state();
+
+    do
+    {
+        if (udp_recv(&clientUdpCommStruct, buffer, sizeof(buffer)) > 0)
+        {
+            //Confirmed there is a stop
+            stop = 1;
+            dataFound = 1;
+        }
+        sleep(1);
+        timeout--;
+    }
+    while ((!stop)&&(timeout));
+
+    if ((!dataFound)&&(!clientDataRcvd))
+    {
+        passed = 1;
+    }
+
+    return passed;
+}
+
+int noDataAvailableTest(void *args)
+{
+    int passed = 0;
+
+    reset_test_state();
+
+    printf("Confirming server and client sockets are open.\n");
+    if (passed)
+    {
+        //Checking that both sockets are initially working and reporting correctly
+        passed &= udp_isOpen(&clientUdpCommStruct);
+        passed &= udp_isOpen(&serverUdpCommStruct);
+    }
+
+    if (passed)
+    {
+        passed &= clientNoDataAvailableTest();
+    }
+
+    if (passed)
+    {
+        passed &= serverNoDataAvailableTest();
+    }
+
+    printf("No Data Read Test: %s\n", passed ? "PASSED" : "FAILED");
+
+    return passed;
+}
+
+int clientBogusNameCheck(void)
+{
+    int passed = 0;
+    char tempHostName[] = "badName";
+    char oldHostName[1024] = "";
+
+    reset_test_state();
+
+    clientDataSent = 0;
+    clientDataRcvd = 0;
+    serverDataSent = 0;
+    serverDataRcvd = 0;
+
+    printf("Checking closing socket in client mode.\n");
+    if (passed)
+    {
+        udp_cleanup(&clientUdpCommStruct);
+        passed &= !udp_isOpen(&clientUdpCommStruct);
+    }
+
+    if (passed)
+    {
+        //Backup old host name
+        strcpy(oldHostName, clientUdpCommStruct.hostname);
+
+        //Swapping char * to place bogus name
+        strcpy(clientUdpCommStruct.hostname, tempHostName);
+
+        printf("Confirming bogus name does not work.\n");
+        if (passed)
+        {
+            udp_init(&clientUdpCommStruct);
+            passed &= !udp_isOpen(&clientUdpCommStruct);
+        }
+
+        if (passed)
+            passed &= !biDirectionalCommCheck();
+
+        //Restore old host name
+        strcpy(clientUdpCommStruct.hostname, oldHostName);
+
+        //Reconnect with old host name
+        if (passed)
+        {
+            udp_init(&clientUdpCommStruct);
+            passed &= udp_isOpen(&clientUdpCommStruct);
+        }
+    }
+
+    return passed;
+}
+
+int clientBogusPortCheck(void)
+{
+    int passed = 0;
+    char tempPortName[] = "-53";
+    char oldPortName[1024] = "";
+
+    reset_test_state();
+
+    clientDataSent = 0;
+    clientDataRcvd = 0;
+    serverDataSent = 0;
+    serverDataRcvd = 0;
+
+    printf("Checking closing socket in client mode.\n");
+    if (passed)
+    {
+        udp_cleanup(&clientUdpCommStruct);
+        passed &= !udp_isOpen(&clientUdpCommStruct);
+    }
+
+    if (passed)
+    {
+        //Backup old host name
+        strcpy(oldPortName, clientUdpCommStruct.port);
+
+        //Swapping char * to place bogus name
+        strcpy(clientUdpCommStruct.port, tempPortName);
+
+        printf("Confirming bogus port does not work.\n");
+        if (passed)
+        {
+            udp_init(&clientUdpCommStruct);
+            passed &= !udp_isOpen(&clientUdpCommStruct);
+        }
+
+        if (passed)
+            passed &= !biDirectionalCommCheck();
+
+        //Restore old host name
+        strcpy(clientUdpCommStruct.port, oldPortName);
+
+        //Reconnect with old host name
+        if (passed)
+        {
+            udp_init(&clientUdpCommStruct);
+            passed &= udp_isOpen(&clientUdpCommStruct);
+        }
+    }
+
+    return passed;
+}
+
+
+int serverBogusNameCheck(void)
+{
+    int passed = 0;
+    char tempHostName[] = "badName";
+    char oldHostName[1024] = "";
+
+    reset_test_state();
+
+    clientDataSent = 0;
+    clientDataRcvd = 0;
+    serverDataSent = 0;
+    serverDataRcvd = 0;
+
+    printf("Checking closing socket in server mode.\n");
+    if (passed)
+    {
+        udp_cleanup(&serverUdpCommStruct);
+        passed &= !udp_isOpen(&serverUdpCommStruct);
+    }
+
+    if (passed)
+    {
+        //Backup old host name
+        strcpy(oldHostName, serverUdpCommStruct.hostname);
+
+        //Swapping char * to place bogus name
+        strcpy(serverUdpCommStruct.hostname, tempHostName);
+
+        printf("Confirming bogus name does not work.\n");
+        if (passed)
+        {
+            udp_init(&serverUdpCommStruct);
+            passed &= !udp_isOpen(&serverUdpCommStruct);
+        }
+
+        if (passed)
+            passed &= !biDirectionalCommCheck();
+
+        //Restore old host name
+        strcpy(serverUdpCommStruct.hostname, oldHostName);
+
+        //Reconnect with old host name
+        if (passed)
+        {
+            udp_init(&serverUdpCommStruct);
+            passed &= udp_isOpen(&serverUdpCommStruct);
+        }
+    }
+
+    return passed;
+}
+
+int serverBogusPortCheck(void)
+{
+    int passed = 0;
+    char tempPortName[] = "-53";
+    char oldPortName[1024] = "";
+
+    reset_test_state();
+
+    clientDataSent = 0;
+    clientDataRcvd = 0;
+    serverDataSent = 0;
+    serverDataRcvd = 0;
+
+    printf("Checking closing socket in server mode.\n");
+    if (passed)
+    {
+        udp_cleanup(&serverUdpCommStruct);
+        passed &= !udp_isOpen(&serverUdpCommStruct);
+    }
+
+    if (passed)
+    {
+        //Backup old host name
+        strcpy(oldPortName, serverUdpCommStruct.port);
+
+        //Swapping char * to place bogus name
+        strcpy(serverUdpCommStruct.port, tempPortName);
+
+        printf("Confirming bogus port does not work.\n");
+        if (passed)
+        {
+            udp_init(&serverUdpCommStruct);
+            passed &= !udp_isOpen(&serverUdpCommStruct);
+        }
+
+        if (passed)
+            passed &= !biDirectionalCommCheck();
+
+        //Restore old host name
+        strcpy(serverUdpCommStruct.port, oldPortName);
+
+        //Reconnect with old host name
+        if (passed)
+        {
+            udp_init(&serverUdpCommStruct);
+            passed &= udp_isOpen(&serverUdpCommStruct);
+        }
+    }
+
+    return passed;
+}
+
+int badNetworkConfigTest(void *args)
+{
+    int passed = 0;
+
+    reset_test_state();
+
+    printf("Confirming server and client sockets are open.\n");
+    if (passed)
+    {
+        //Checking that both sockets are initially working and reporting correctly
+        passed &= udp_isOpen(&clientUdpCommStruct);
+        passed &= udp_isOpen(&serverUdpCommStruct);
+    }
+
+    if (passed)
+    {
+        passed &= clientBogusNameCheck();
+    }
+
+    if (passed)
+    {
+        passed &= clientBogusPortCheck();
+    }
+
+    if (passed)
+    {
+        passed &= serverBogusNameCheck();
+    }
+
+    if (passed)
+    {
+        passed &= serverBogusPortCheck();
+    }
+
+    printf("Invalid Network Config Test: %s\n", passed ? "PASSED" : "FAILED");
 
     return passed;
 }

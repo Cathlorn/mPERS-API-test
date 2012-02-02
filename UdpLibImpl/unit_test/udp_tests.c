@@ -5,6 +5,9 @@ const TestItem udpProtocolTests[] =
 {
     {"UDP Bidirectional Comm Test", commTest},
     {"UDP ReOpening Socket Test", reOpenTest},
+    {"UDP Bad IP Write Test", badAddrWriteTest},
+    {"UDP Read No Data Test", noDataAvailableTest},
+    {"UDP Invalid Network Config Test", badNetworkConfigTest},
 };
 
 TestSuite udpProtocolTesting =
