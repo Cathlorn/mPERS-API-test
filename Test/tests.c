@@ -21,6 +21,7 @@ void getTestItemChoice(TestSuite *testSuite)
 {
     int i;
 
+    fflush(stdin);
     scanf("%d", &i);
     i--;
 
