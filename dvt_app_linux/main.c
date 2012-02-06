@@ -55,7 +55,7 @@ int processArguments ( int argc, char **argv, ProgramInitParams *initParams )
                 "Test Item to Run. (Just '-t' displays tests)");
         printf("%-40s     %40s\n","-a [arg1],[arg2],...",
                 "Test Item Arguments. Arguments for the test should be comma separated.");
-        printf("%-40s     %40s\n","-d [badcrc,commfail=[% fail],noack]",
+        printf("%-40s     %40s\n","-d [badcrc,commfail=[% fail],noack,outseq]",
                "Debug Control flags to test failure conditions.");
         printf("%-40s     %40s\n","-s",
                "Server Mode (without argument, default is client mode.");
@@ -114,12 +114,20 @@ int processArguments ( int argc, char **argv, ProgramInitParams *initParams )
                             printf("Bad CRC enabled\n");
                             initParams->dbgParams.badCrc = 1;
                         }
+
                         if(strMatchFound("noack", subArg))
                         {
                             printf("No Acknowledgement enabled\n");
                             initParams->dbgParams.neverAck = 1;
                         }
-                        else if(strMatchFound("commfail", subArg))
+
+                        if(strMatchFound("outseq", subArg))
+                        {
+                            printf("Out of Sequence Numbering enabled\n");
+                            initParams->dbgParams.outOfSeqTx = 1;
+                        }
+
+                        if(strMatchFound("commfail", subArg))
                         {
                             int commArgStartIndex = 0;
                             int percentFail = 0;
@@ -142,10 +150,6 @@ int processArguments ( int argc, char **argv, ProgramInitParams *initParams )
                                 printf("Comm Fail set to (%d %%)\n", percentFail);
                                 initParams->dbgParams.spottyRx = percentFail;
                             }
-                        }
-                        else if(strMatchFound("noack", subArg))
-                        {
-                            printf("No Ack to be enabled\n");
                         }
                     }
                 }
