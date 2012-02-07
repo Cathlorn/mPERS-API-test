@@ -86,6 +86,11 @@ int sendDynamicVitalsPkt(void *args)
             stop = 1;
             passed = 1;
         }
+        else if (stats.txConfirmedPkts >= numMsgsToSend)
+        {
+            //Confirmed there is a stop
+            stop = 1;
+        }
         else if ((stats.txPkts == numMsgsSent)&&(stats.txDataPkts == numMsgsSent)
                  &&(stats.txConfirmedPkts == numMsgsSent)
                  &&(stats.rxAcks == numMsgsSent))
@@ -169,6 +174,11 @@ int sendPanicMsgPkt(void *args)
             stop = 1;
             passed = 1;
         }
+        else if (stats.txConfirmedPkts >= numMsgsToSend)
+        {
+            //Confirmed there is a stop
+            stop = 1;
+        }
         else if ((stats.txPkts == numMsgsSent)&&(stats.txDataPkts == numMsgsSent)
                  &&(stats.txConfirmedPkts == numMsgsSent)
                  &&(stats.rxAcks == numMsgsSent))
@@ -249,6 +259,11 @@ int sendFallMsgPkt(void *args)
             //Confirmed there is a stop
             stop = 1;
             passed = 1;
+        }
+        else if (stats.txConfirmedPkts >= numMsgsToSend)
+        {
+            //Confirmed there is a stop
+            stop = 1;
         }
         else if ((stats.txPkts == numMsgsSent)&&(stats.txDataPkts == numMsgsSent)
                  &&(stats.txConfirmedPkts == numMsgsSent)
@@ -332,6 +347,11 @@ int sendOperatorAckMsgPkt(void *args)
             stop = 1;
             passed = 1;
         }
+        else if (stats.txConfirmedPkts >= numMsgsToSend)
+        {
+            //Confirmed there is a stop
+            stop = 1;
+        }
         else if ((stats.txPkts == numMsgsSent)&&(stats.txDataPkts == numMsgsSent)
                  &&(stats.txConfirmedPkts == numMsgsSent)
                  &&(stats.rxAcks == numMsgsSent))
@@ -407,6 +427,11 @@ int sendInvalidMsgPkt(void *args)
             //Confirmed there is a stop
             stop = 1;
             passed = 1;
+        }
+        else if (stats.txConfirmedPkts >= numMsgsToSend)
+        {
+            //Confirmed there is a stop
+            stop = 1;
         }
         else if ((stats.txPkts == numMsgsSent)&&(stats.txDataPkts == numMsgsSent)
                  &&(stats.txConfirmedPkts == numMsgsSent)
