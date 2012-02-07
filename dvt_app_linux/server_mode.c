@@ -93,13 +93,13 @@ void * serverTestThreadHandler(void *arg)
 
     assert(pTestInfo);
 
-    runTestItem(&serverPacketTesting, pTestInfo->testNumber, pTestInfo->testArgs);
+    pTestInfo->testResult = runTestItem(&serverPacketTesting, pTestInfo->testNumber, pTestInfo->testArgs);
     runThreads = 0;
 
     return NULL;
 }
 
-void run_server(unsigned char debug, char *port, int testNumber, char *testArgs, HaloUdpCommDbg dbgParams)
+int run_server(unsigned char debug, char *port, int testNumber, char *testArgs, HaloUdpCommDbg dbgParams)
 {
     uint8 actAsServer = 1;
     pthread_t testThr;
@@ -138,5 +138,7 @@ void run_server(unsigned char debug, char *port, int testNumber, char *testArgs,
         printf("Could not join thread\n");
         exit(-1);
     }
+
+    return testInfo.testResult;
 }
 

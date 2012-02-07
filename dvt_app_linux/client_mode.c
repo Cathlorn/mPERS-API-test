@@ -95,13 +95,13 @@ void * testThreadHandler(void *arg)
 
     assert(pTestInfo);
 
-    runTestItem(&packetTesting, pTestInfo->testNumber, pTestInfo->testArgs);
+    pTestInfo->testResult = runTestItem(&packetTesting, pTestInfo->testNumber, pTestInfo->testArgs);
     runThreads = 0;
 
     return NULL;
 }
 
-void run_client(unsigned char debug, char *hostname, char *port, int testNumber, char *testArgs, HaloUdpCommDbg dbgParams)
+int run_client(unsigned char debug, char *hostname, char *port, int testNumber, char *testArgs, HaloUdpCommDbg dbgParams)
 {
     uint8 actAsServer = 0;
     pthread_t testThr;
@@ -140,4 +140,6 @@ void run_client(unsigned char debug, char *hostname, char *port, int testNumber,
         printf("Could not join thread\n");
         exit(-1);
     }
+
+    return testInfo.testResult;
 }

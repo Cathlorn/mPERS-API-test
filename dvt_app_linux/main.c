@@ -217,6 +217,7 @@ int processArguments ( int argc, char **argv, ProgramInitParams *initParams )
 
 int main ( int argc, char *argv[] )
 {
+    int result = -1;
     ProgramInitParams initParams = PROGRAM_INIT_PARAMS_INIT(0, "localhost", "53778", 0);
 
     processArguments(argc, argv, &initParams);
@@ -227,17 +228,28 @@ int main ( int argc, char *argv[] )
             showTestItems(&serverPacketTesting);
         else
             showTestItems(&packetTesting);
+
+        result = 0;
     }
     else
     {
         if (initParams.actAsServer)
-            run_server(initParams.debug, initParams.port, initParams.testNumber,
+            result = run_server(initParams.debug, initParams.port, initParams.testNumber,
                        initParams.testArgumentString, initParams.dbgParams);
         else
-            run_client(initParams.debug, initParams.hostname, initParams.port,
+            result = run_client(initParams.debug, initParams.hostname, initParams.port,
                        initParams.testNumber, initParams.testArgumentString,
                        initParams.dbgParams);
     }
 
-    return 0;
+    if(result)
+    {
+        result = SUCCESS;
+    }
+    else
+    {
+        result = FAIL;
+    }
+
+    return result;
 }

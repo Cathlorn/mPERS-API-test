@@ -5,12 +5,14 @@ typedef struct
 {
     int testNumber;
     char *testArgs;
+    int testResult;
 }
 TestInfo;
 
 #define TEST_INFO_INIT(a,b) { \
  .testNumber  = a, \
  .testArgs = b, \
+ .testResult = -1, \
 }
 
 typedef int ( *TestFunction ) ( void *args );

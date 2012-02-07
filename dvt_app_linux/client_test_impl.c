@@ -231,9 +231,10 @@ int sendFallMsgPkt(void *args)
     //Clear stats
     halo_msg_reset_stats();
 
-    for (i = 0; i < numMsgsToSend; i++)
+    for (i = 0; (i < burstSize) && (numMsgsSent < numMsgsToSend); i++)
     {
         halo_msg_send((HaloMessage *) &fallMsg);
+        numMsgsSent++;
     }
 
     do
