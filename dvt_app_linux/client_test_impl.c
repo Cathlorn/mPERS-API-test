@@ -20,6 +20,7 @@ int sendDynamicVitalsPkt(void *args)
     uint16 steps[] = {1,2,3,4,5,6,7,8,9,10};
     uint16 activities[] = {1,2,3,4,5,6,7,8,9,10};
     uint8 dynamicVitalsBuffer[sizeof(DynamicVitalsMsg)]; //Created to be this size since the packed version should always be the same or smaller than the full msg version
+    int dynamicVitalsPackedLength = 0;
     HaloUdpStats stats = HALO_UDP_STATS_INIT();
     int stop = 0;
     int timeout = 10; //second timeout
@@ -60,7 +61,7 @@ int sendDynamicVitalsPkt(void *args)
     dynamicVitalsMsg.currentLocation.accuracy = 109;
 
     //Compress contents of structure into a minimal byte stream for transmission
-    pack_DynamicVitalsMsg(&dynamicVitalsMsg, dynamicVitalsBuffer);
+    pack_DynamicVitalsMsg(&dynamicVitalsMsg, dynamicVitalsBuffer, &dynamicVitalsPackedLength);
 
     //Clear stats
     halo_msg_reset_stats();
@@ -69,7 +70,7 @@ int sendDynamicVitalsPkt(void *args)
     for (i = 0; (i < burstSize) && (numMsgsSent < numMsgsToSend); i++)
     {
         //Do a generic send with vitals msg
-        halo_msg_send((HaloMessage *) dynamicVitalsBuffer);
+        halo_msg_send((HaloMessage *) dynamicVitalsBuffer, dynamicVitalsPackedLength);
         numMsgsSent++;
     }
 
@@ -99,7 +100,7 @@ int sendDynamicVitalsPkt(void *args)
             for (i = 0; (i < burstSize) && (numMsgsSent < numMsgsToSend); i++)
             {
                 //Do a generic send with vitals msg
-                halo_msg_send((HaloMessage *) dynamicVitalsBuffer);
+                halo_msg_send((HaloMessage *) dynamicVitalsBuffer, dynamicVitalsPackedLength);
                 numMsgsSent++;
             }
         }
@@ -157,7 +158,7 @@ int sendPanicMsgPkt(void *args)
     for (i = 0; (i < burstSize) && (numMsgsSent < numMsgsToSend); i++)
     {
         //Do a generic send
-        halo_msg_send((HaloMessage *) &panicMsg);
+        halo_msg_send((HaloMessage *) &panicMsg, sizeof(panicMsg));
         numMsgsSent++;
     }
 
@@ -187,7 +188,7 @@ int sendPanicMsgPkt(void *args)
             for (i = 0; (i < burstSize) && (numMsgsSent < numMsgsToSend); i++)
             {
                 //Do a generic send
-                halo_msg_send((HaloMessage *) &panicMsg);
+                halo_msg_send((HaloMessage *) &panicMsg, sizeof(panicMsg));
                 numMsgsSent++;
             }
         }
@@ -243,7 +244,7 @@ int sendFallMsgPkt(void *args)
 
     for (i = 0; (i < burstSize) && (numMsgsSent < numMsgsToSend); i++)
     {
-        halo_msg_send((HaloMessage *) &fallMsg);
+        halo_msg_send((HaloMessage *) &fallMsg, sizeof(fallMsg));
         numMsgsSent++;
     }
 
@@ -273,7 +274,7 @@ int sendFallMsgPkt(void *args)
             for (i = 0; (i < burstSize) && (numMsgsSent < numMsgsToSend); i++)
             {
                 //Do a generic send
-                halo_msg_send((HaloMessage *) &fallMsg);
+                halo_msg_send((HaloMessage *) &fallMsg, sizeof(fallMsg));
                 numMsgsSent++;
             }
         }
@@ -330,7 +331,7 @@ int sendOperatorAckMsgPkt(void *args)
     for (i = 0; (i < burstSize) && (numMsgsSent < numMsgsToSend); i++)
     {
         //Do a generic send
-        halo_msg_send((HaloMessage *) &operatorAckMsg);
+        halo_msg_send((HaloMessage *) &operatorAckMsg, sizeof(operatorAckMsg));
         numMsgsSent++;
     }
 
@@ -360,7 +361,7 @@ int sendOperatorAckMsgPkt(void *args)
             for (i = 0; (i < burstSize) && (numMsgsSent < numMsgsToSend); i++)
             {
                 //Do a generic send
-                halo_msg_send((HaloMessage *) &operatorAckMsg);
+                halo_msg_send((HaloMessage *) &operatorAckMsg, sizeof(operatorAckMsg));
                 numMsgsSent++;
             }
         }
@@ -411,7 +412,7 @@ int sendInvalidMsgPkt(void *args)
     for (i = 0; (i < burstSize) && (numMsgsSent < numMsgsToSend); i++)
     {
         //Do a generic send
-        halo_msg_send((HaloMessage *) &invalidMsg[0]);
+        halo_msg_send((HaloMessage *) &invalidMsg[0], sizeof(invalidMsg));
         numMsgsSent++;
     }
 
@@ -441,7 +442,7 @@ int sendInvalidMsgPkt(void *args)
             for (i = 0; (i < burstSize) && (numMsgsSent < numMsgsToSend); i++)
             {
                 //Do a generic send
-                halo_msg_send((HaloMessage *) &invalidMsg[0]);
+                halo_msg_send((HaloMessage *) &invalidMsg[0], sizeof(invalidMsg));
                 numMsgsSent++;
             }
         }

@@ -20,7 +20,7 @@ void init_base_message(uint16 commandType, uint8 formatVersion,
     message->deviceId = deviceId;
 }
 
-int getMsgLength(const HaloMessage *msg)
+/*int getMsgLength(const HaloMessage *msg)
 {
     int len = -1;
 
@@ -70,4 +70,4 @@ int getMsgLength(const HaloMessage *msg)
     }
 
     return len;
-}
+} */

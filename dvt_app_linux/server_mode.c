@@ -26,6 +26,7 @@ void server_myhalo_udp_msg_rcvd(void *data)
     //HaloMessage *msg = (HaloMessage *) data;
     HaloUdpEventData *rcvEventData = (HaloUdpEventData *) data;
     HaloMessage *msg = (HaloMessage *) rcvEventData->data;
+    int msgLength = rcvEventData->dataLength;
 
     if (msg->commandType == ALL_DATA_DYNAMIC)
     {
@@ -33,10 +34,10 @@ void server_myhalo_udp_msg_rcvd(void *data)
 
         //Send back the same data
         //halo_msg_send(msg);
-        halo_msg_sendto(msg, rcvEventData->socketAddress);
+        halo_msg_sendto(msg, msgLength, rcvEventData->socketAddress);
 
         //Read the structure correctly
-        unpack_DynamicVitalsMsg(msg, &dynamicVitalsMsg);
+        unpack_DynamicVitalsMsg(msg, msgLength, &dynamicVitalsMsg);
 
         if (serverDebug)
         {

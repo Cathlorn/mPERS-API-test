@@ -86,10 +86,14 @@ HaloUdpEventData;
 //Operation
 void halo_msg_init(HaloUdpUserData *userData);
 void halo_msg_new_session(int sessionIndex);
-int halo_msg_send(const HaloMessage *msg);
-int halo_msg_sendto(const HaloMessage *msg,
+//int halo_msg_send(const HaloMessage *msg);
+//int halo_msg_sendto(const HaloMessage *msg,
+//                    GenericIP socketAddress);
+//int halo_msg_send_to_index(const HaloMessage *msg, int sessionIndex);
+int halo_msg_send(const void *data, const int len);
+int halo_msg_sendto(const void *data, const int len,
                     GenericIP socketAddress);
-int halo_msg_send_to_index(const HaloMessage *msg, int sessionIndex);
+int halo_msg_send_to_index(const void *data, const int len, int sessionIndex);
 int halo_msg_session_count(void);
 void halo_msg_report_session(int offset);
 void halo_msg_tick(void);

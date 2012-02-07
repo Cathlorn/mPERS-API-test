@@ -51,7 +51,7 @@ void sendPkts(int numPkts)
     for (i = 0; i < numPkts; i++)
     {
         //Send a message
-        halo_msg_sendto((HaloMessage *) msg, socketAddress);
+        halo_msg_sendto((HaloMessage *) msg, msgLength, socketAddress);
         pktsGenerated++;
         //printf("pktsGenerated: %d\n", pktsGenerated);
     }
@@ -269,7 +269,7 @@ int txSessionControlTest(void *args)
     setTestSendCallback(txSessionControlTest_SendCallback);
 
     //Send a message
-    halo_msg_sendto((HaloMessage *) msg, socketAddress);
+    halo_msg_sendto((HaloMessage *) msg, msgLength, socketAddress);
 
     do
     {
@@ -296,7 +296,7 @@ int txSessionControlTest(void *args)
                     enableSessionResponseData();
 
                     //Send a message
-                    halo_msg_sendto((HaloMessage *) msg, socketAddress);
+                    halo_msg_sendto((HaloMessage *) msg, msgLength, socketAddress);
 
                     stage = 1;
                 }
@@ -320,7 +320,7 @@ int txSessionControlTest(void *args)
                     enableSessionResponseData();
 
                     //Send a message
-                    halo_msg_sendto((HaloMessage *) msg, socketAddress);
+                    halo_msg_sendto((HaloMessage *) msg, msgLength, socketAddress);
 
                     stage = 2;
                 }

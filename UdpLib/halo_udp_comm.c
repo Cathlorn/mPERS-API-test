@@ -206,7 +206,7 @@ void halo_msg_new_session(int sessionIndex)
 }
 
 //NOTE: Access in the send queue needs to be thread-protected so that additions/ removal are locked
-int halo_msg_sendto(const HaloMessage *msg,
+int halo_msg_sendto(const void *data, const int len,
                     GenericIP socketAddress)
 {
     int result = FAIL;
@@ -214,7 +214,7 @@ int halo_msg_sendto(const HaloMessage *msg,
 
     if (getSessionIndex(socketAddress, &sessionIndex) == SUCCESS)
     {
-        result = halo_msg_send_to_index(msg, sessionIndex);
+        result = halo_msg_send_to_index(data, len, sessionIndex);
     }
     else
     {
@@ -241,7 +241,7 @@ int halo_msg_sendto(const HaloMessage *msg,
                 halo_msg_new_session(firstAvailableSessionSlot);
 
                 //Send using the new entry
-                result = halo_msg_send_to_index(msg, firstAvailableSessionSlot);
+                result = halo_msg_send_to_index(data, len, firstAvailableSessionSlot);
                 break;
             }
         }
@@ -250,29 +250,30 @@ int halo_msg_sendto(const HaloMessage *msg,
     return result;
 }
 
-int halo_msg_send(const HaloMessage *msg)
+int halo_msg_send(const void *data, const int len)
 {
-    return halo_msg_send_to_index(msg, haloUdpCommData.currentSessionIndex);
+    return halo_msg_send_to_index(data, len, haloUdpCommData.currentSessionIndex);
 }
 
-int halo_msg_send_to_index(const HaloMessage *msg, int sessionIndex)
+int halo_msg_send_to_index(const void *data, const int len, int sessionIndex)
 {
     SessionData *currentSessionPtr = NULL;
     MyHaloUdpHeader header = MY_HALO_UDP_HEADER_INIT();
     UdpCommStruct *commStruct = NULL;
     HaloUdpTxMgmt *txMgmt = NULL;
     int msgLen;
-    int payloadLen;
-    uint8 *data;
-    int dataLen;
+    //int payloadLen;
+    uint8 *dataBuf;
+    int dataBufLen;
     uint16 pktCrc;
     int result = FAIL;
 
     commStruct = &haloUdpCommData.haloUdpCommStruct;
     txMgmt     = &haloUdpCommData.txMgmt;
-    payloadLen = getMsgLength(msg);
+    //payloadLen = getMsgLength(msg);
 
-    msgLen = payloadLen;
+    //msgLen = payloadLen;
+    msgLen = len;
     //Update the msg length
     msgLen += sizeof(MyHaloUdpHeader); //header: udp data
     msgLen += sizeof(uint16);  //tail: crc
@@ -282,29 +283,29 @@ int halo_msg_send_to_index(const HaloMessage *msg, int sessionIndex)
     if (currentSessionPtr->used)
     {
         //Allocate a tx buffer
-        if (getBuffer(msgLen, (void **) &data, &dataLen) != SUCCESS)
+        if (getBuffer(msgLen, (void **) &dataBuf, &dataBufLen) != SUCCESS)
         {
             printf("Unable to allocate buffer!\n");
             assert(0);
         }
 
         header.status |= DATA_AVAILABLE;
-        header.payloadLength = payloadLen;
+        header.payloadLength = len;
 
         header.seqNum = currentSessionPtr->txSeqNum;
 
         //Copy data into the tx buffer
-        memcpy(data, &header, sizeof(header));
-        memcpy(&data[sizeof(header)], msg, payloadLen);
+        memcpy(dataBuf, &header, sizeof(header));
+        memcpy(&dataBuf[sizeof(header)], data, len);
 
-        pktCrc = hdlcFcs16(hdlc_init_fcs16, data, msgLen - 2);
+        pktCrc = hdlcFcs16(hdlc_init_fcs16, dataBuf, msgLen - 2);
 
         //Intentionally make CRCs bad
         if (haloUdpCommData.userData->dbgTestCtrls.badCrc)
             pktCrc++;
 
         //Copy CRC
-        memcpy(&data[msgLen - 2], &pktCrc, sizeof(pktCrc));
+        memcpy(&dataBuf[msgLen - 2], &pktCrc, sizeof(pktCrc));
 
         //Advance the sequence number
         if (haloUdpCommData.userData->dbgTestCtrls.outOfSeqTx)
@@ -312,11 +313,11 @@ int halo_msg_send_to_index(const HaloMessage *msg, int sessionIndex)
         else
             currentSessionPtr->txSeqNum++;
 
-        if (enqueue_tx_packet(txMgmt, data, msgLen, header.seqNum, currentSessionPtr->socketAddr) == SUCCESS)
+        if (enqueue_tx_packet(txMgmt, dataBuf, msgLen, header.seqNum, currentSessionPtr->socketAddr) == SUCCESS)
         {
             result = SUCCESS;
             if (haloUdpCommData.userData->dbgTestCtrls.duplicateTx)
-                enqueue_tx_packet(txMgmt, data, msgLen, header.seqNum, currentSessionPtr->socketAddr);
+                enqueue_tx_packet(txMgmt, dataBuf, msgLen, header.seqNum, currentSessionPtr->socketAddr);
         }
         else
         {
@@ -887,7 +888,7 @@ void udp_recv_handler(void *data)
                 updateRxDataBytes(&haloUdpCommData.stats, udpEventData.length);
 
                 if (haloUdpCommData.userData->dbgTestCtrls.loopback)
-                    halo_msg_sendto((HaloMessage *) payloadPtr, udpEventData.commStruct->rcvIP);
+                    halo_msg_sendto((HaloMessage *) payloadPtr, payloadLength, udpEventData.commStruct->rcvIP);
             }
         }
     }

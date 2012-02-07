@@ -387,7 +387,7 @@ int txDropTest(void *args)
     reset_test_state();
 
     //Send a message
-    halo_msg_sendto((HaloMessage *) msg, socketAddress);
+    halo_msg_sendto((HaloMessage *) msg, msgLength, socketAddress);
 
     do
     {
@@ -472,10 +472,10 @@ int txGoodTest(void *args)
     enableSessionResponseData();
 
     //Send a message
-    halo_msg_sendto((HaloMessage *) msg, socketAddress);
-    halo_msg_sendto((HaloMessage *) msg, socketAddress);
-    halo_msg_sendto((HaloMessage *) msg, socketAddress);
-    halo_msg_sendto((HaloMessage *) msg, socketAddress);
+    halo_msg_sendto((HaloMessage *) msg, msgLength, socketAddress);
+    halo_msg_sendto((HaloMessage *) msg, msgLength, socketAddress);
+    halo_msg_sendto((HaloMessage *) msg, msgLength, socketAddress);
+    halo_msg_sendto((HaloMessage *) msg, msgLength, socketAddress);
 
     do
     {

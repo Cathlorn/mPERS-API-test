@@ -24,13 +24,14 @@ void client_myhalo_udp_msg_rcvd(void *data)
     //HaloMessage *msg = (HaloMessage *) data;
     HaloUdpEventData *rcvEventData = (HaloUdpEventData *) data;
     HaloMessage *msg = (HaloMessage *) rcvEventData->data;
+    int msgLength = rcvEventData->dataLength;
 
     if (msg->commandType == ALL_DATA_DYNAMIC)
     {
         DynamicVitalsMsg dynamicVitalsMsg;
 
         //Read the structure correctly
-        unpack_DynamicVitalsMsg(msg, &dynamicVitalsMsg);
+        unpack_DynamicVitalsMsg(msg, msgLength, &dynamicVitalsMsg);
 
         if (clientDebug)
         {

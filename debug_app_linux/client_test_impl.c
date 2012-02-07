@@ -16,6 +16,7 @@ int sendDynamicVitalsPkt(void *args)
     uint16 steps[] = {1,2,3,4,5,6,7,8,9,10};
     uint16 activities[] = {1,2,3,4,5,6,7,8,9,10};
     uint8 dynamicVitalsBuffer[sizeof(DynamicVitalsMsg)]; //Created to be this size since the packed version should always be the same or smaller than the full msg version
+    int dynamicVitalsPackedLength = 0;
 
     //Set the base parameters for the message
     init_base_message(ALL_DATA_DYNAMIC, 3, time(NULL), 518, (HaloMessage *) &dynamicVitalsMsg);
@@ -42,10 +43,10 @@ int sendDynamicVitalsPkt(void *args)
     dynamicVitalsMsg.currentLocation.accuracy = 109;
 
     //Compress contents of structure into a minimal byte stream for transmission
-    pack_DynamicVitalsMsg(&dynamicVitalsMsg, dynamicVitalsBuffer);
+    pack_DynamicVitalsMsg(&dynamicVitalsMsg, dynamicVitalsBuffer, &dynamicVitalsPackedLength);
 
     //Do a generic send with vitals msg
-    halo_msg_send((HaloMessage *) dynamicVitalsBuffer);
+    halo_msg_send((HaloMessage *) dynamicVitalsBuffer, dynamicVitalsPackedLength);
 
     return 1;
 }
@@ -61,7 +62,7 @@ int sendPanicMsgPkt(void *args)
     panicMsg.currentLocation.accuracy = 999;
 
     //Do a generic send with panic msg
-    halo_msg_send((HaloMessage *) &panicMsg);
+    halo_msg_send((HaloMessage *) &panicMsg, sizeof(panicMsg));
 
     return 1;
 }
@@ -77,7 +78,7 @@ int sendFallMsgPkt(void *args)
     fallMsg.currentLocation.accuracy = 23;
 
     //Do a generic send with panic msg
-    halo_msg_send((HaloMessage *) &fallMsg);
+    halo_msg_send((HaloMessage *) &fallMsg, sizeof(fallMsg));
 
     return 1;
 }
@@ -93,9 +94,9 @@ int sendBurst(void *args)
     panicMsg.currentLocation.accuracy = 217;
 
     //Do a generic send with panic msg
-    halo_msg_send((HaloMessage *) &panicMsg);
-    halo_msg_send((HaloMessage *) &panicMsg);
-    halo_msg_send((HaloMessage *) &panicMsg);
+    halo_msg_send((HaloMessage *) &panicMsg, sizeof(panicMsg));
+    halo_msg_send((HaloMessage *) &panicMsg, sizeof(panicMsg));
+    halo_msg_send((HaloMessage *) &panicMsg, sizeof(panicMsg));
 
     return 1;
 }
