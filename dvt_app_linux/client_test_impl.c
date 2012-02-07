@@ -493,6 +493,11 @@ int listenMsg(void *args)
             stop = 1;
             passed = 1;
         }
+        else if (stats.rxGoodPkts >= numMsgsToRecv)
+        {
+            //Confirmed there is a stop
+            stop = 1;
+        }
 
         printf("%d of %d msgs received\n", stats.rxDataPkts, numMsgsToRecv);
         sleep(1);
