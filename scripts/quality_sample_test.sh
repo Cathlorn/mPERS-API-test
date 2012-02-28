@@ -41,7 +41,7 @@ fi
 #  echo "NoAckTest: FAILED"
 #fi
 
-#Test Server will succeed in deliverying even with 50% success
+#Test Server will succeed in delivering even with 50% success
 ./halo_udp_dvt -dcommfail=50 -h$TARGET_SERVER -p$TARGET_PORT -t2 -a5
 
 
