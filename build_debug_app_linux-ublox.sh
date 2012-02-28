@@ -6,7 +6,7 @@ if [ "$CC" = "" ]; then
 CC=gcc
 fi
 
-$CC -lpthread -I . -o halo_udp_dbg_lnx debug_app_linux/client_mode.c \
+$CC -lpthread -I . -o halo_udp_dbg_ublox debug_app_linux/client_mode.c \
 debug_app_linux/client_test_impl.c \
 debug_app_linux/client_tests.c \
 debug_app_linux/main.c \
