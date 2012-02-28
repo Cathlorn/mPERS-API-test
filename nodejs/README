@@ -1,4 +1,4 @@
 Run the following commands to launch the node.js server
 
 ulimit -v unlimited
-node udp_server.js
+node mpers_udp_server.js
