@@ -9,7 +9,7 @@
 #include "server_mode.h"
 #include "client_tests.h"
 #include "server_tests.h"
-#include "types.h"
+#include "General/types.h"
 #include "str_utils.h"
 
 typedef struct

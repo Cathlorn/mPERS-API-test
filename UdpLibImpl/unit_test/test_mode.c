@@ -4,7 +4,7 @@
 #include <unistd.h>
 #include <pthread.h>
 
-#include "types.h"
+#include "General/types.h"
 
 #include "UdpLib/udp_lib.h"
 #include "udp_tests.h"

@@ -3,7 +3,7 @@
 #include <string.h>
 #include <assert.h>
 
-#include "types.h"
+#include "General/types.h"
 
 #include "UdpLib/udp_lib.h"
 #include "test_control_interface.h"
