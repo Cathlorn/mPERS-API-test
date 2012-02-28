@@ -1,7 +1,7 @@
 #ifndef HALO_MESSAGE_H
 #define HALO_MESSAGE_H
 
-#include "types.h"
+#include "General/types.h"
 
 //Generic Message structure. All Messages will contain these and are essential for proper operation
 typedef struct

@@ -4,7 +4,7 @@
 #define HALO_UDP_COMM_H
 
 #include "mpers/HaloMessage.h"
-#include "types.h"
+#include "General/types.h"
 #include "GenericIP.h"
 #include "halo_udp_stats.h"
 

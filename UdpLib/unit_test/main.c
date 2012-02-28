@@ -6,7 +6,7 @@
 #include <assert.h>
 
 #include "test_mode.h"
-#include "types.h"
+#include "General/types.h"
 
 typedef struct
 {

@@ -4,7 +4,7 @@
 #include <unistd.h>
 #include <pthread.h>
 
-#include "types.h"
+#include "General/types.h"
 
 #include "UdpLib/myHaloUdp.h"
 #include "UdpLib/halo_udp_comm.h"

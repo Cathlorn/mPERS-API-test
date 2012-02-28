@@ -1,7 +1,7 @@
 #ifndef BATTERY_INFO_H
 #define BATTERY_INFO_H
 
-#include "types.h"
+#include "General/types.h"
 
 enum BattStatus
 {

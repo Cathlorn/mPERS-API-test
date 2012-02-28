@@ -1,7 +1,7 @@
 #ifndef MY_HALO_UDP_H
 #define MY_HALO_UDP_H
 
-#include "types.h"
+#include "General/types.h"
 
 #define MSG_RECEIVED_ACK  1   //Indicates that a message was received
 #define DATA_AVAILABLE    2   //Indicates that there is a new message in this datagram

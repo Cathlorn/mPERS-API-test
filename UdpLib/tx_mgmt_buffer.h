@@ -1,7 +1,7 @@
 #ifndef TX_MGMT_BUFFER_H
 #define TX_MGMT_BUFFER_H
 
-#include "types.h"
+#include "General/types.h"
 #include "GenericIP.h"
 
 //Configuration

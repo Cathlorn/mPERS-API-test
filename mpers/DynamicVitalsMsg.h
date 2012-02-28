@@ -1,7 +1,7 @@
 #ifndef DYNAMIC_VITALS_H
 #define DYNAMIC_VITALS_H
 
-#include "types.h"
+#include "General/types.h"
 #include "ActivityInfo.h"
 #include "BatteryInfo.h"
 #include "HaloMessage.h"

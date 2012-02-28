@@ -4,7 +4,7 @@
 #include <stdlib.h>
 #include <pthread.h>
 
-#include "types.h"
+#include "General/types.h"
 #include "mpers/Location.h"
 #include "mpers/DynamicVitalsMsg.h"
 #include "mpers/CriticalAlertMsg.h"

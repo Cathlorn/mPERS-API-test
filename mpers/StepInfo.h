@@ -1,7 +1,7 @@
 #ifndef STEP_INFO_H
 #define STEP_INFO_H
 
-#include "types.h"
+#include "General/types.h"
 
 #define MAX_STEP_ENTRIES 50
 

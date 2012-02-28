@@ -3,7 +3,7 @@
 //Generic Buffer pool that returns points to different statically allocated segments of memory
 //Pool implements a circular queue from a static array
 
-#include "types.h"
+#include "General/types.h"
 #include "General/genericStaticArrayBuffer.h"
 #include "tx_buffer_static.h"
 

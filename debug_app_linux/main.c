@@ -7,7 +7,7 @@
 
 #include "client_mode.h"
 #include "server_mode.h"
-#include "types.h"
+#include "General/types.h"
 
 typedef struct
 {

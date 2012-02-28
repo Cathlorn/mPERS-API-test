@@ -7,7 +7,7 @@
 #include "tx_buffer.h"
 #include "halo_udp_tx_mgmt.h"
 
-#include "types.h"
+#include "General/types.h"
 
 int enqueue_tx_packet(HaloUdpTxMgmt *txMgmt, uint8 *data, int len, uint16 seqNum,
                       GenericIP socketAddress)

@@ -6,7 +6,7 @@
 #include <stdlib.h>
 
 #include "test_msg_queue.h"
-#include "types.h"
+#include "General/types.h"
 
 #define MAX_QUEUE_SIZE 2000//20
 

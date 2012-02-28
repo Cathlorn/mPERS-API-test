@@ -1,7 +1,7 @@
 #ifndef SIGNAL_STRENGTH_H
 #define SIGNAL_STRENGTH_H
 
-#include "types.h"
+#include "General/types.h"
 
 typedef struct
 {

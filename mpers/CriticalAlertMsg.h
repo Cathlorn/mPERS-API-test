@@ -1,7 +1,7 @@
 #ifndef CRITICAL_ALERT_H
 #define CRITICAL_ALERT_H
 
-#include "types.h"
+#include "General/types.h"
 #include "HaloMessage.h"
 #include "Location.h"
 #include "SignalStrength.h"

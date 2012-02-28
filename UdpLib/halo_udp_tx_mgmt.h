@@ -1,7 +1,7 @@
 #ifndef HALO_UDP_TX_MGMT_H
 #define HALO_UDP_TX_MGMT_H
 
-#include "types.h"
+#include "General/types.h"
 #include "GenericIP.h"
 #include "tx_mgmt_buffer.h"
 

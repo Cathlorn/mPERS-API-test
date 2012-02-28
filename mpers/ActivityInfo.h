@@ -1,7 +1,7 @@
 #ifndef ACTIVITY_INFO_H
 #define ACTIVITY_INFO_H
 
-#include "types.h"
+#include "General/types.h"
 
 #define MAX_ACTIVITY_ENTRIES 50
 

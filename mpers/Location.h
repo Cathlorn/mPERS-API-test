@@ -1,7 +1,7 @@
 #ifndef LOCATION_H
 #define LOCATION_H
 
-#include "types.h"
+#include "General/types.h"
 
 typedef struct
 {
