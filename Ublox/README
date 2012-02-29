@@ -1,0 +1,26 @@
+The following document is intended to describe how exactly software is structure to work with the UBlox Cellular modules.
+
+Presently, the Ublox port in intended for the LISA and LEON families of the Ublox cellular modules.
+There modules have AT commands that allow for UDP messages to be able to be sent directly from a host computer without the need of the host computer to have a network stack present.
+The port essentially works under the hood of a generic modem interface that was created. The interface works essentially having one master interface that handles all interactions with the modem (defined in Modem/at_mgmt.h). This interface breaks down all interactions into basically 2 types: commands and responses. The interface maintains a command queue where commands are issued and its own response table for defining what needs to happend when asynchronous feedback is reported by the modem. A given AT command could have several responses that can be reported back when execution is finished. The modem interface structure is organized so that each command points to a table of potential responses that may come from that command as well as pointers to the callback functions that need to be invoked should a given response be received.
+For example, for the AT command ATDT1234567, "CONNECT", "ERROR", "NO CARRIER", are all potential responses that could be returned from this dial command. These responses would be in a table like so:
+ResponseTable {
+{"CONNECT", HandleSettingUpData},
+{"ERROR", HandleDialFailure},
+{"NO CARRIER", HandleDialFailure},
+}
+
+Should the AT command respond with success, it should report "CONNECT" among other info. In this case, the HandleSettingUpData callback function would be called to resolve any additional followup tasks needed to get data delivery working.
+Should the AT command respond with failure with "NO CARRIER", then the HandlerDialFailure callback will be called and error resolution for the command failing will be made.
+
+The actual process in which an item in the AT command queue gets executed is as follows:
+1. The AT command is retreived from the queue.
+2. The AT command gets sent across the uart.
+3. The echo of the AT command is confirmed to ensure that modem output is synchronized with what is expected of the input.
+4. Should echo not get confirmed after a fixed amount of time, the AT command is resent.
+5. Assuming the echo is confirmed, the modem interface listens for any output from the modem that matches a response listed in the command's response table.
+6. Once a response table match is found, the corresponding callback is made and all output from the line containing the response match is passed into the callback for processing. The AT command is then dequeue and the process begins anew.
+
+The standalone response table works by calling corresponding callbacks whenever a line is found that contains the matching expected response. (For example, AT+UUPSD indicates that the cellular detection has dropped, which can happen without warning. A callback would be invoked to handle the connection failure). The callback can be invoked in between at commands or when there are no commands present. Essentially, the standalone response table of the modem interface acts exactly the same as the response table managed belonging to modem commands except they are not tied to a command.
+
+UART management is handled in a way similar to how the udp interface is defined in udp_lib.h. Instead there is uart_posix.h. This defines all of the functions and behaviors expected for a UART to function properly. From there, many ports can be made to get the UART to function properly on different targets without the need of the actual modem management code to be modified.
