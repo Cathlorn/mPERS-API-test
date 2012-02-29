@@ -1,0 +1,18 @@
+DVT:
+Dvt program should have an argument maybe '-t' that will show all available tests
+It will take as an argument the test number to perform and return the result.
+Default test timeout will be 40 seconds for any send and 15 seconds for any receive.
+
+Additional arguments may be given
+
+Send Panics [number: default = 1] -> exit when tx empty
+Send Falls [number: default = 1]-> exit when tx empty
+Send Operator Ack [number: default = 1] -> exit when tx empty
+Send Dynamic Vitals [number: default = 1] -> exit when tx empty
+Send Invalid Msg [number: default = 1] -> exit when tx empty (puts garbage  in a good crc to hang the system)
+Listen for Message [number: default = 1] -> exit when 40s of silence
+For the DVT if we want to get more output use '-v'
+Also -d [crc,spotty [%], ack] to be able to respectively corrupt the crc, do spotty rx, and never acknowledge packtets from the myHalo UDP level for additional test flexibility
+-h and -p and -s are still valid, maybe add a -? to display all these arguments
+
+

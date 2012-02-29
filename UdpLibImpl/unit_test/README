@@ -1,0 +1,13 @@
+Create unit tests for checking udp impl:
+Create client, create server using network loopback.
+Confirm bidirectional communication.
+Close and reopen a socket and confirm it still works.
+Confirm no communication happens when socket is closed.
+Call a write when no target.
+Call a read when no data available.
+Call a read when data available
+Call a write when there is a target.
+Put bogus name and confirm connect fails.
+Put bogus port and confirm connect fails.
+Put bogus name and confirm bind fails
+Put bogus port and confirm bind fails.

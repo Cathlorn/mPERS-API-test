@@ -1,0 +1,76 @@
+In order to get everything to compile, call build-all.sh
+Build-all.sh will work as follows:
+It will compile the unit tests. It will then run the unit tests on the target compiling the unit.
+It will then proceed to compiling any remaining applications such as the DVT, or debug application should the
+unit test runs succeed.
+
+Build-all.sh calls the following scripts to get all of the compiling done:
+build_debug_app_linux.sh
+build_debug_app_linux-ublox.sh
+build-dvt.sh
+build-unit-test.sh
+
+Each of the build scripts can be called as "is" and will default to call "gcc"
+
+However, they also can take a single argument where there provide the name/path of the compiler.
+
+For example,
+./build-all.sh /home/development/compilers/arm-gcc
+
+could be called to build everything using an ARM compiler. NOTE: Modifications maybe needed for build-all for cross compiling as the unit test run will most likely fail since the unit test cannot run natively under those circumstances.
+
+There are 2 unit tests that are conducted: the myHalo UDP Protocol unit test and the UDP library unit test.
+
+The UDP library unit test works by taking a selected implementation of the UDP library udp interface and confirming that full UDP functionality is maintained. It does this by performing in parallel both server and client instances of the interface under network loopback. Presently the UDP library interface supports only IPv4.
+For more details on exactly what is involved in the UDP unit testing, please see the README under the UDP Library Implementation folder for more details.
+
+The myHalo UDP Protocol unit test works by creating a test implementation of the UDP library that simulates incoming and outgoing network traffic. This test implementation basically provides test inputs into the myHalo UDP library and confirms that the response behavior from the library is what is expected. please see the README under the UDP Library folder for more details on exactly what is tested.
+
+The DVT application essentially works by taking a selected UDP library implementation and combining it with the myHalo UDP Protocol library to enable a series of testing from the target device to another remote device. The DVT allows the user to have the target act as a client or server, send particular mPERS messages, and inject various errors into the handling of the mPERS protocol. The intent of the DVT is to allow for secondary testing of the target device (such as system level quality testing) as well as to server as the standard of using the target device to test another device, such as a remote server. Please check the README of the DVT application for more details there. The application is constructed in such a way so that manual or automated testing can be conducted using the program. When in automation, the user may choose a test number such as 2 which generates n (you choose what n is) panic messages and confirms that those messages are successfully sent without any errors. The program terminates when the test successfully executes or times out. The result of the test is both printed out and returned as output of the program. (It returns 0 if there is a success and anything else represents an error code, the default being -1 (GENERAL_FAILURE)). As a side note, this return format is used for all of the unit test applications as well.
+
+The debug application works essentially the same as the DVT application except that it suitable only for manual testing/ debugging. A text menu system is used to choose each test option.
+
+
+UDP Library Further Details:
+
+myHalo UDP Protocol Library Layer Interaction Description
+
+Application -> Transport
+
+Overview:
+All data associated a single myHalo UDP transport session is associated with the instance of a myHalo UDP data structure. That data structure, allows for the application to specify the name of the network location intended as well as the UDP port. Furthermore, function pointers are present so that a given application can assign its own handlers for events that it wants to be sensitive to for transport. The protocol assumes that there is only one application in use for a given myHalo UDP data structure. If that differs, it is the responsibility of the application layer to handle the multiplexing. An init function is available to allow for setting up the UDP protocol. A cleanup function is available to tear down the UDP protocol setup. A tick function is setup to do the actually work of the myHalo UDP. It is recommended that this periodically be called by a timer or scheduler, however, the ticks are structured so that everything is state driven, the frequency of the calling is totally at the discretion of the application. NOTE: If ticks are seldom (consistently seconds or minutes between calls) or never called, the protocol may perform very poorly or fail to function completely. 500 millisecond calls or less would be the recommendation.
+
+udp_lib.h provides a set of structures and function definitions that the myHaloUDP library depends on in order to function properly. By defining the definition there, it allows stubs to be created and development of the myHaloUDP protocol library support to be able to be conducted independently of the details needed in actually sending an receiving UDP data. The UDPLibImpl (UDP Library Implementation) folder houses the source code for all of the various implementations of the definitions defined in udp_lib.h As long as the implementation conforms to the expectations needed by the udp_lib.h, the developer has full discretion to design the port as he/she sees fit. This approach as enables the myHaloUDP library to be easily ported to a number of platforms. Unit testing provides a means of confirming compiliance of a given port to what is expected from the udp_lib.h defintions. Implementations already provided include a linux socket library implementation and an linux uart implementation for communicating using at commands to a ublox cellular modem.
+
+Example of UDP interface structure:
+
+myHaloUDPData
+{
+    String ServerName;
+    int    ServerPort;
+    FunctionPointer *MsgSentNotificationHandler;
+    FunctionPointer *MsgDroppedNotificationHandler;
+    FunctionPointer *MsgReceivedNotificationHandler;
+    FunctionPointer *UDPFailureNotificationHandler;
+    FunctionPointer *GeneralFailureNotificationHandler;
+}
+
+
+Sending Messages
+It is desired for the myHalo UDP to operate using generic function calls for sending messages so that the application layer may at any point and time initiate a message. Support may be given to allow for blocking on sending data, however, the primary use is intended for it to be asynchronous. The send function will act as nonblocking and indicate whether or not the transport layer was successful in placing the new message into the transmit queue. When the outcome of a transmit message is determined (either is slated to be dropped or successfully sent), an event is sent to the application layer handler to notify about the message. When sending a message a user may specifiy a pointer to its own custom additional data associated with a given message if desired. The custom data as well as the full message itself are included with the event. The application layer should be provided with all of the details to handle, however it chooses for managing its data, especially when there is failure to send. In the event a message is slated to be dropped, a new send message call can be made from within the drop notification handler to place the message back into the transmit queue. The application layer has the ability to read back and potentially change any of the configurable parameters for myHalo Transport.
+
+Receiving Messages 
+All Messages are set up so that the application layer is notified using events sent to the MsgReceivedNotificationHandler. If synchronous interface is desired for the application, it is the responsibility of the application to provide one. Each msg received notification event includes the length as well as a pointer to the data message itself.
+
+Transport -> Application
+
+Events
+If there is a failure with the UDP transport layer itself, the UDP Failure Notification Handler will be invoked to notify of the failure as well as an indication as to what caused the failure.
+
+Application Layer Accessible myHalo UDP Protocol Configuration Parameters:
+
+# of times to Retry sending a message
+
+Time between transmission attempts.
+
+
